@@ -1,0 +1,23 @@
+<div class="auth-container">
+  <div class="card-custom" style="max-width: 400px;">
+    <h2 style="text-align: center;">Iniciar Sesión</h2>
+    <form (ngSubmit)="onLogin()" #loginForm="ngForm" style="display: flex; flex-direction: column; gap: 1.5rem;">
+      <div class="flex-col">
+        <label>Correo Electrónico</label>
+        <span class="p-input-icon-left w-full">
+          <i class="pi pi-envelope"></i>
+          <input pInputText type="email" name="email" [(ngModel)]="user.email" required class="w-full" />
+        </span>
+      </div>
+
+      <div class="flex-col">
+        <label>Contraseña</label>
+        <p-password name="password" [(ngModel)]="user.password" [feedback]="false" [toggleMask]="true" styleClass="w-full" inputStyleClass="w-full" required></p-password>
+      </div>
+
+      <p-button label="Ingresar" type="submit" [disabled]="!loginForm.valid" styleClass="w-full"></p-button>
+
+      <p-button label="Crear una cuenta" [link]="true" routerLink="/register" styleClass="w-full"></p-button>
+    </form>
+  </div>
+</div>

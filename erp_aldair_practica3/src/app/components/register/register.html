@@ -1,0 +1,55 @@
+<div class="auth-container">
+  <div class="card-custom" style="max-width: 600px;">
+    <h2 style="text-align: center;">Registro de Usuario</h2>
+    <form [formGroup]="registerForm" (ngSubmit)="onSubmit()" class="form-grid">
+
+      <div class="flex-col">
+        <label>Usuario</label>
+        <input pInputText formControlName="usuario" class="w-full" />
+      </div>
+
+      <div class="flex-col">
+        <label>Nombre Completo</label>
+        <input pInputText formControlName="nombreCompleto" class="w-full" />
+      </div>
+
+      <div class="flex-col col-span-2">
+        <label>Email</label>
+        <input pInputText formControlName="email" type="email" class="w-full" />
+      </div>
+
+      <div class="flex-col">
+        <label>Teléfono</label>
+        <input pInputText formControlName="telefono" pKeyFilter="int" class="w-full" />
+      </div>
+
+      <div class="flex-col">
+        <label>Fecha de Nacimiento</label>
+        <p-calendar formControlName="fechaNacimiento" [showIcon]="true" appendTo="body" dateFormat="dd/mm/yy" styleClass="w-full"></p-calendar>
+        <small class="p-error" *ngIf="registerForm.get('fechaNacimiento')?.errors?.['menorDeEdad']">Es menor de edad</small>
+      </div>
+
+      <div class="flex-col col-span-2">
+        <label>Dirección</label>
+        <input pInputText formControlName="direccion" class="w-full" />
+      </div>
+
+      <div class="flex-col">
+        <label>Contraseña</label>
+        <p-password formControlName="password" [toggleMask]="true" styleClass="w-full" inputStyleClass="w-full"></p-password>
+        <small class="p-error" *ngIf="registerForm.get('password')?.errors?.['pattern']">Requiere min 10 caracteres y 1 símbolo</small>
+      </div>
+
+      <div class="flex-col">
+        <label>Confirmar</label>
+        <p-password formControlName="confirmarPassword" [toggleMask]="true" [feedback]="false" styleClass="w-full" inputStyleClass="w-full"></p-password>
+        <small class="p-error" *ngIf="registerForm.errors?.['notSame']">Las contraseñas no coinciden</small>
+      </div>
+
+      <div class="col-span-2 mt-1">
+        <p-button label="Registrarse" type="submit" [disabled]="registerForm.invalid" styleClass="w-full"></p-button>
+        <p-button label="Volver al Login" [link]="true" routerLink="/login" styleClass="w-full"></p-button>
+      </div>
+    </form>
+  </div>
+</div>
