@@ -1,0 +1,89 @@
+<p-toast></p-toast>
+
+<div style="padding: 2rem; max-width: 1000px; margin: 0 auto;">
+
+  <p-card styleClass="mb-4">
+    <ng-template pTemplate="title">
+      <div style="display: flex; align-items: center; gap: 1rem;">
+        <p-avatar icon="pi pi-user" size="xlarge" shape="circle" [style]="{'background-color': '#2196F3', 'color': '#ffffff'}"></p-avatar>
+        <span style="font-size: 1.5rem;">Perfil de Usuario (RUD)</span>
+      </div>
+    </ng-template>
+
+    <ng-template pTemplate="content">
+      <p-divider></p-divider>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-top: 1rem;">
+        <div style="display: flex; flex-direction: column;">
+          <span style="font-weight: bold; color: #666;">Usuario</span>
+          <span style="font-size: 1.1rem; margin-top: 0.2rem;">{{ userData.usuario }}</span>
+        </div>
+        <div style="display: flex; flex-direction: column;">
+          <span style="font-weight: bold; color: #666;">Nombre Completo</span>
+          <span style="font-size: 1.1rem; margin-top: 0.2rem;">{{ userData.nombreCompleto }}</span>
+        </div>
+        <div style="display: flex; flex-direction: column;">
+          <span style="font-weight: bold; color: #666;">Email</span>
+          <span style="font-size: 1.1rem; margin-top: 0.2rem;">{{ userData.email }}</span>
+        </div>
+        <div style="display: flex; flex-direction: column;">
+          <span style="font-weight: bold; color: #666;">Teléfono</span>
+          <span style="font-size: 1.1rem; margin-top: 0.2rem;">{{ userData.telefono }}</span>
+        </div>
+        <div style="display: flex; flex-direction: column;">
+          <span style="font-weight: bold; color: #666;">Fecha de Nacimiento</span>
+          <span style="font-size: 1.1rem; margin-top: 0.2rem;">{{ userData.fechaNacimiento }}</span>
+        </div>
+        <div style="display: flex; flex-direction: column; grid-column: span 2;">
+          <span style="font-weight: bold; color: #666;">Dirección</span>
+          <span style="font-size: 1.1rem; margin-top: 0.2rem;">{{ userData.direccion }}</span>
+        </div>
+      </div>
+    </ng-template>
+
+    <ng-template pTemplate="footer">
+      <p-divider></p-divider>
+      <div style="display: flex; justify-content: flex-end; gap: 1rem; margin-top: 1rem;">
+        <p-button label="Actualizar Datos" icon="pi pi-check" severity="success" (click)="actualizarUsuario()"></p-button>
+        <p-button label="Eliminar Cuenta" icon="pi pi-trash" [outlined]="true" severity="danger" (click)="eliminarCuenta()"></p-button>
+        <p-button label="Salir" icon="pi pi-sign-out" [text]="true" severity="secondary" routerLink="/login"></p-button>
+      </div>
+    </ng-template>
+  </p-card>
+
+  <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-bottom: 1rem;">
+    <p-card styleClass="p-card-shadow text-center" [style]="{'text-align': 'center'}">
+      <h3 style="margin: 0; color: #64748b;">Pendientes</h3>
+      <p style="font-size: 2.5rem; font-weight: bold; margin: 0.5rem 0; color: #f59e0b;">{{ stats.pendientes }}</p>
+    </p-card>
+    <p-card styleClass="p-card-shadow text-center" [style]="{'text-align': 'center'}">
+      <h3 style="margin: 0; color: #64748b;">En Progreso</h3>
+      <p style="font-size: 2.5rem; font-weight: bold; margin: 0.5rem 0; color: #3b82f6;">{{ stats.progreso }}</p>
+    </p-card>
+    <p-card styleClass="p-card-shadow text-center" [style]="{'text-align': 'center'}">
+      <h3 style="margin: 0; color: #64748b;">Hechos</h3>
+      <p style="font-size: 2.5rem; font-weight: bold; margin: 0.5rem 0; color: #22c55e;">{{ stats.hechos }}</p>
+    </p-card>
+  </div>
+
+  <p-card header="Mi Carga de Trabajo (Tickets Asignados)">
+    <p-table [value]="ticketsUsuario" [rows]="5" styleClass="p-datatable-sm">
+      <ng-template pTemplate="header">
+        <tr>
+          <th>Título</th>
+          <th>Estado</th>
+          <th>Prioridad</th>
+          <th>Fecha Límite</th>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="body" let-t>
+        <tr>
+          <td><strong>{{ t.titulo }}</strong></td>
+          <td><p-tag [value]="t.estado" [severity]="getSeverity(t.estado)"></p-tag></td>
+          <td>{{ t.prioridad }}</td>
+          <td>{{ t.fecha }}</td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </p-card>
+
+</div>

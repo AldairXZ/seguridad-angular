@@ -1,0 +1,86 @@
+<p-toast></p-toast>
+<div style="padding: 2rem; max-width: 1200px; margin: 0 auto;">
+
+  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+    <div style="display: flex; gap: 1rem; align-items: center;">
+      <h2 style="margin: 0; color: #334155;">Control de Grupos (CRUD)</h2>
+      <p-tag [value]="auth.role" [severity]="auth.role === 'admin' ? 'danger' : 'info'"></p-tag>
+      <p-button label="Cambiar Rol (Prueba)" [text]="true" size="small" (click)="auth.toggleRole()"></p-button>
+    </div>
+
+    <p-button *ngIf="auth.hasPermission('group:add')" label="Nuevo Grupo" icon="pi pi-plus" severity="success" (click)="abrirNuevo()"></p-button>
+  </div>
+
+  <p-table [value]="grupos" [paginator]="true" [rows]="5" styleClass="p-datatable-gridlines p-datatable-sm">
+    <ng-template pTemplate="header">
+      <tr>
+        <th>ID</th>
+        <th>Nombre</th>
+        <th>Categoría</th>
+        <th>Nivel</th>
+        <th>Autor</th>
+        <th>Miembros</th>
+        <th>Tickets</th>
+        <th style="text-align: center;">Acciones</th>
+      </tr>
+    </ng-template>
+    <ng-template pTemplate="body" let-g>
+      <tr>
+        <td>{{ g.id }}</td>
+        <td><strong>{{ g.nombre }}</strong></td>
+        <td>{{ g.categoria }}</td>
+        <td>
+          <span [style.color]="g.nivel === 'Alto' ? '#ef4444' : '#3b82f6'">{{ g.nivel }}</span>
+        </td>
+        <td>{{ g.autor }}</td>
+        <td>{{ g.miembros }}</td>
+        <td>{{ g.tickets }}</td>
+        <td>
+          <div style="display: flex; gap: 0.5rem; justify-content: center;">
+            <p-button *ngIf="auth.hasPermission('group:view')" icon="pi pi-arrow-right" [rounded]="true" severity="success" routerLink="/vista-grupo" title="Ver Tablero de Tickets"></p-button>
+            <p-button *ngIf="auth.hasPermission('group:edit')" icon="pi pi-pencil" [rounded]="true" [outlined]="true" severity="info" (click)="editarGrupo(g)"></p-button>
+            <p-button *ngIf="auth.hasPermission('group:delete')" icon="pi pi-trash" [rounded]="true" [outlined]="true" severity="danger" (click)="eliminarGrupo(g)"></p-button>
+          </div>
+        </td>
+      </tr>
+    </ng-template>
+  </p-table>
+</div>
+
+<p-dialog [(visible)]="grupoDialog" [style]="{width: '500px'}" header="Detalles del Grupo" [modal]="true" styleClass="p-fluid">
+  <ng-template pTemplate="content">
+    <div class="field" style="margin-bottom: 1rem;">
+      <label for="nombre" style="font-weight: bold; display: block; margin-bottom: 0.5rem;">Nombre</label>
+      <input type="text" pInputText id="nombre" [(ngModel)]="grupo.nombre" required autofocus />
+      <small class="p-error" style="color: red;" *ngIf="submitted && !grupo.nombre">El nombre es requerido.</small>
+    </div>
+    <div class="field" style="margin-bottom: 1rem;">
+      <label for="categoria" style="font-weight: bold; display: block; margin-bottom: 0.5rem;">Categoría</label>
+      <input type="text" pInputText id="categoria" [(ngModel)]="grupo.categoria" />
+    </div>
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+      <div class="field">
+        <label for="nivel" style="font-weight: bold; display: block; margin-bottom: 0.5rem;">Nivel</label>
+        <input type="text" pInputText id="nivel" [(ngModel)]="grupo.nivel" />
+      </div>
+      <div class="field">
+        <label for="autor" style="font-weight: bold; display: block; margin-bottom: 0.5rem;">Autor</label>
+        <input type="text" pInputText id="autor" [(ngModel)]="grupo.autor" />
+      </div>
+    </div>
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+      <div class="field">
+        <label for="miembros" style="font-weight: bold; display: block; margin-bottom: 0.5rem;">Miembros</label>
+        <input type="number" pInputText id="miembros" [(ngModel)]="grupo.miembros" />
+      </div>
+      <div class="field">
+        <label for="tickets" style="font-weight: bold; display: block; margin-bottom: 0.5rem;">Tickets</label>
+        <input type="number" pInputText id="tickets" [(ngModel)]="grupo.tickets" />
+      </div>
+    </div>
+  </ng-template>
+  <ng-template pTemplate="footer">
+    <p-button label="Cancelar" icon="pi pi-times" [text]="true" severity="secondary" (click)="ocultarDialogo()"></p-button>
+    <p-button label="Guardar" icon="pi pi-check" (click)="guardarGrupo()"></p-button>
+  </ng-template>
+</p-dialog>
