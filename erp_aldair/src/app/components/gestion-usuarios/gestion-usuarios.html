@@ -1,0 +1,69 @@
+<p-toast></p-toast>
+<div style="padding: 2rem; max-width: 1200px; margin: 0 auto;">
+
+  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+    <h2 style="margin: 0; color: #334155;">Gestión de Usuarios (SuperAdmin)</h2>
+    <p-button label="Nuevo Usuario" icon="pi pi-plus" severity="success" (click)="abrirNuevo()"></p-button>
+  </div>
+
+  <p-table [value]="usuarios" [paginator]="true" [rows]="5" styleClass="p-datatable-striped">
+    <ng-template pTemplate="header">
+      <tr>
+        <th>Nombre</th>
+        <th>Email</th>
+        <th>Rol</th>
+        <th>Permisos Asignados</th>
+        <th style="text-align: center;">Acciones</th>
+      </tr>
+    </ng-template>
+    <ng-template pTemplate="body" let-u>
+      <tr>
+        <td><strong>{{ u.nombre }}</strong></td>
+        <td>{{ u.email }}</td>
+        <td>
+          <p-tag [value]="u.rol" [severity]="u.rol === 'superAdmin' ? 'danger' : (u.rol === 'admin' ? 'info' : 'success')"></p-tag>
+        </td>
+        <td>{{ u.permisos.length }} permisos activos</td>
+        <td style="text-align: center;">
+          <p-button icon="pi pi-pencil" [rounded]="true" [text]="true" severity="info" (click)="editarUsuario(u)"></p-button>
+          <p-button icon="pi pi-trash" [rounded]="true" [text]="true" severity="danger" (click)="eliminarUsuario(u)"></p-button>
+        </td>
+      </tr>
+    </ng-template>
+  </p-table>
+</div>
+
+<p-dialog [(visible)]="usuarioDialog" [style]="{width: '650px'}" header="Detalle y Permisos de Usuario" [modal]="true" styleClass="p-fluid">
+  <ng-template pTemplate="content">
+
+    <div class="field" style="margin-bottom: 1rem;">
+      <label style="font-weight: bold; display: block; margin-bottom: 0.5rem;">Nombre Completo</label>
+      <input pInputText [(ngModel)]="usuarioActual.nombre" />
+    </div>
+
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem;">
+      <div class="field">
+        <label style="font-weight: bold; display: block; margin-bottom: 0.5rem;">Email</label>
+        <input pInputText [(ngModel)]="usuarioActual.email" />
+      </div>
+      <div class="field">
+        <label style="font-weight: bold; display: block; margin-bottom: 0.5rem;">Rol del Sistema</label>
+        <input pInputText [(ngModel)]="usuarioActual.rol" />
+      </div>
+    </div>
+
+    <h4 style="margin-top: 1rem; border-bottom: 1px solid #e2e8f0; padding-bottom: 0.5rem; color: #334155;">Asignación de Permisos (RBAC)</h4>
+
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 1rem;">
+      <div *ngFor="let perm of permisosDisponibles" style="display: flex; align-items: center; gap: 0.5rem;">
+        <p-checkbox name="permisos" [value]="perm" [(ngModel)]="usuarioActual.permisos" [inputId]="perm"></p-checkbox>
+        <label [for]="perm" style="cursor: pointer;">{{ perm }}</label>
+      </div>
+    </div>
+
+  </ng-template>
+  <ng-template pTemplate="footer">
+    <p-button label="Cancelar" icon="pi pi-times" [text]="true" severity="secondary" (click)="usuarioDialog = false"></p-button>
+    <p-button label="Guardar Configuración" icon="pi pi-check" (click)="guardarUsuario()"></p-button>
+  </ng-template>
+</p-dialog>
