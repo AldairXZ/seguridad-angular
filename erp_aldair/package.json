@@ -1,5 +1,6 @@
 {
-  "name": "practica-sg1",
+  "name": "erp_Aldair",
+  "author": "Stefano",
   "version": "0.0.0",
   "scripts": {
     "ng": "ng",
@@ -22,19 +23,19 @@
   },
   "private": true,
   "dependencies": {
-    "@angular/cdk": "^20.2.14",
+    "@angular/animations": "^20.3.16",
     "@angular/common": "^20.3.0",
     "@angular/compiler": "^20.3.0",
     "@angular/core": "^20.3.0",
     "@angular/forms": "^20.3.0",
     "@angular/platform-browser": "^20.3.0",
     "@angular/router": "^20.3.0",
-    "@primeng/themes": "^21.0.4",
+    "chart.js": "^4.5.1",
     "primeicons": "^7.0.0",
-    "primeng": "^20.4.0",
+    "primeng": "^17.18.12",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0",
-    "zone.js": "~0.15.0"
+    "zone.js": "^0.15.1"
   },
   "devDependencies": {
     "@angular/build": "^20.3.3",

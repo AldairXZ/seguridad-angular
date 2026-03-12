@@ -1,0 +1,47 @@
+<div style="padding: 2rem; max-width: 1200px; margin: 0 auto;">
+  <h2 style="color: #334155; margin-bottom: 1.5rem;">Dashboard Principal</h2>
+
+  <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
+
+    <p-card header="Resumen General" styleClass="p-card-shadow">
+      <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 1rem 0;">
+        <span style="font-size: 1.2rem; color: #64748b; margin-bottom: 0.5rem;">Total Acumulado</span>
+        <span style="font-size: 4rem; font-weight: bold; color: #1e293b; line-height: 1; margin-bottom: 1rem;">
+          {{ totalTickets }}
+        </span>
+        <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; justify-content: center;">
+          <p-tag *ngFor="let stat of estadisticas" [value]="stat.cantidad + ' ' + stat.estado" [severity]="stat.color"></p-tag>
+        </div>
+      </div>
+    </p-card>
+
+    <p-card header="Estadísticas por Status" styleClass="p-card-shadow">
+      <div style="display: flex; justify-content: center;">
+        <p-chart type="doughnut" [data]="pieData" [options]="pieOptions" width="250px" height="250px"></p-chart>
+      </div>
+    </p-card>
+
+    <p-card header="Tickets Creados (Semana)" styleClass="p-card-shadow">
+      <p-chart type="bar" [data]="barData" [options]="barOptions" height="250px"></p-chart>
+    </p-card>
+
+  </div>
+
+  <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem;">
+
+    <p-card subheader="Gestión de Perfil" styleClass="p-card-shadow">
+      <p style="color: #64748b;">Visualiza y administra los datos del usuario actual.</p>
+      <ng-template pTemplate="footer">
+        <p-button label="Ir a Usuarios" icon="pi pi-user" routerLink="/user" styleClass="w-full" [outlined]="true"></p-button>
+      </ng-template>
+    </p-card>
+
+    <p-card subheader="Control de Grupos" styleClass="p-card-shadow">
+      <p style="color: #64748b;">Administra los proyectos y accede a los tableros Kanban.</p>
+      <ng-template pTemplate="footer">
+        <p-button label="Ver Grupos" icon="pi pi-users" severity="success" routerLink="/group" styleClass="w-full"></p-button>
+      </ng-template>
+    </p-card>
+
+  </div>
+</div>
