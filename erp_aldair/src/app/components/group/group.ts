@@ -10,6 +10,7 @@ import { MessageService } from 'primeng/api';
 import { RouterModule } from '@angular/router';
 import { TagModule } from 'primeng/tag';
 import { AuthService } from '../../services/auth';
+import { HasPermissionDirective } from '../../directives/has-permission.directive';
 
 @Component({
   selector: 'app-group',
@@ -23,7 +24,8 @@ import { AuthService } from '../../services/auth';
     DialogModule,
     ToastModule,
     RouterModule,
-    TagModule
+    TagModule,
+    HasPermissionDirective
   ],
   providers: [MessageService],
   templateUrl: './group.html'

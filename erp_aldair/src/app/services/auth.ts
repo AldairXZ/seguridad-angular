@@ -8,59 +8,66 @@ import { tap } from 'rxjs/operators';
   providedIn: 'root'
 })
 export class AuthService {
-  private apiUrl = 'https://spatial-delcine-devemma-edfc3f92.koyeb.app';
+  private apiUrl = 'http://localhost:3000';
 
-  usuariosDb: any[] = [];
   usuarioActual: any = null;
 
   constructor(private http: HttpClient, private router: Router) {
     this.cargarDatosGuardados();
   }
 
+  private setCookie(name: string, value: string, days: number) {
+    const date = new Date();
+    date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+    document.cookie = `${name}=${value};expires=${date.toUTCString()};path=/`;
+  }
+
+  private getCookie(name: string): string | null {
+    const nameEQ = `${name}=`;
+    const ca = document.cookie.split(';');
+    for (let i = 0; i < ca.length; i++) {
+      let c = ca[i];
+      while (c.charAt(0) === ' ') c = c.substring(1);
+      if (c.indexOf(nameEQ) === 0) return c.substring(nameEQ.length);
+    }
+    return null;
+  }
+
+  private deleteCookie(name: string) {
+    document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 UTC;path=/;`;
+  }
+
   cargarDatosGuardados() {
-    const sesionGuardada = localStorage.getItem('erp_sesion_actual');
+    const sesionGuardada = this.getCookie('erp_sesion_actual');
     if (sesionGuardada) {
       this.usuarioActual = JSON.parse(sesionGuardada);
     }
-
-    const dbGuardada = localStorage.getItem('erp_usuarios_db');
-    if (dbGuardada) {
-      this.usuariosDb = JSON.parse(dbGuardada);
-    }
-  }
-
-  guardarBaseDeDatos() {
-    localStorage.setItem('erp_usuarios_db', JSON.stringify(this.usuariosDb));
   }
 
   login(email: string, pass: string): Observable<any> {
-    return this.http.post<any>(`${this.apiUrl}/login`, { email: email, password: pass }).pipe(
+    return this.http.post<any>(`${this.apiUrl}/auth/login`, { email: email, password: pass }).pipe(
       tap(response => {
-        const rawPermisos = response.permissions || response.user?.permissions || [];
-        const permisosAdaptados = [...rawPermisos];
-
-        if (permisosAdaptados.includes('ticket:edit:state')) {
-          permisosAdaptados.push('ticket:edit_state');
-        }
-        if (permisosAdaptados.includes('user:manage')) {
-          permisosAdaptados.push('users:view');
-        }
+        const userData = response.data[0].user;
+        const token = response.data[0].token;
 
         this.usuarioActual = {
-          id: Date.now(),
-          nombre: email.split('@')[0],
-          email: email,
-          permisos: permisosAdaptados
+          id: userData.id,
+          nombre: userData.nombre,
+          email: userData.email,
+          permisos: userData.permisos,
+          token: token
         };
 
-        localStorage.setItem('erp_sesion_actual', JSON.stringify(this.usuarioActual));
+        this.setCookie('erp_sesion_actual', JSON.stringify(this.usuarioActual), 1);
+        this.setCookie('erp_token', token, 1);
       })
     );
   }
 
   logout() {
     this.usuarioActual = null;
-    localStorage.removeItem('erp_sesion_actual');
+    this.deleteCookie('erp_sesion_actual');
+    this.deleteCookie('erp_token');
     this.router.navigate(['/login']);
   }
 

@@ -1,15 +1,17 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
+import { RouterModule, Router } from '@angular/router';
+import { FormsModule } from '@angular/forms';
 import { CardModule } from 'primeng/card';
 import { ButtonModule } from 'primeng/button';
 import { TagModule } from 'primeng/tag';
 import { ChartModule } from 'primeng/chart';
+import { DropdownModule } from 'primeng/dropdown';
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterModule, CardModule, ButtonModule, TagModule, ChartModule],
+  imports: [CommonModule, RouterModule, FormsModule, CardModule, ButtonModule, TagModule, ChartModule, DropdownModule],
   templateUrl: './dashboard.html'
 })
 export class DashboardComponent implements OnInit {
@@ -27,7 +29,17 @@ export class DashboardComponent implements OnInit {
   barData: any;
   barOptions: any;
 
+  grupos: any[] = [];
+  grupoSeleccionado: any = null;
+
+  constructor(private router: Router) {}
+
   ngOnInit() {
+    this.grupos = [
+      { id: 1, nombre: 'Proyecto Alpha' },
+      { id: 2, nombre: 'Soporte TI' }
+    ];
+
     this.pieData = {
       labels: ['Pendiente', 'En Progreso', 'Revisión', 'Finalizado'],
       datasets: [
@@ -60,5 +72,11 @@ export class DashboardComponent implements OnInit {
         legend: { display: false }
       }
     };
+  }
+
+  onGrupoChange(event: any) {
+    if (event.value) {
+      this.router.navigate(['/vista-grupo']);
+    }
   }
 }

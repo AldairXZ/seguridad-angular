@@ -7,7 +7,7 @@
       <p-tag *ngIf="auth.usuarioActual" [value]="auth.usuarioActual?.nombre" severity="info"></p-tag>
     </div>
 
-    <p-button *ngIf="auth.hasPermission('group:add')" label="Nuevo Grupo" icon="pi pi-plus" severity="success" (click)="abrirNuevo()"></p-button>
+    <p-button *appHasPermission="'group:add'" label="Nuevo Grupo" icon="pi pi-plus" severity="success" (click)="abrirNuevo()"></p-button>
   </div>
 
   <p-table [value]="grupos" [paginator]="true" [rows]="5" styleClass="p-datatable-gridlines p-datatable-sm">
@@ -36,9 +36,9 @@
         <td>{{ g.tickets }}</td>
         <td>
           <div style="display: flex; gap: 0.5rem; justify-content: center;">
-            <p-button *ngIf="auth.hasPermission('group:view')" icon="pi pi-arrow-right" [rounded]="true" severity="success" routerLink="/vista-grupo" title="Ver Tablero de Tickets"></p-button>
-            <p-button *ngIf="auth.hasPermission('group:edit')" icon="pi pi-pencil" [rounded]="true" [outlined]="true" severity="info" (click)="editarGrupo(g)"></p-button>
-            <p-button *ngIf="auth.hasPermission('group:delete')" icon="pi pi-trash" [rounded]="true" [outlined]="true" severity="danger" (click)="eliminarGrupo(g)"></p-button>
+            <p-button *appHasPermission="'group:view'" icon="pi pi-arrow-right" [rounded]="true" severity="success" routerLink="/vista-grupo" title="Ver Tablero de Tickets"></p-button>
+            <p-button *appHasPermission="'group:edit'" icon="pi pi-pencil" [rounded]="true" [outlined]="true" severity="info" (click)="editarGrupo(g)"></p-button>
+            <p-button *appHasPermission="'group:delete'" icon="pi pi-trash" [rounded]="true" [outlined]="true" severity="danger" (click)="eliminarGrupo(g)"></p-button>
           </div>
         </td>
       </tr>

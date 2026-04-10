@@ -1,34 +1,24 @@
 <div style="padding: 2rem;">
 
-  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-    <div style="display: flex; gap: 1rem; align-items: center;">
-      <h2 style="margin: 0;">Gestión de Grupo: Alpha</h2>
-      <p-tag *ngIf="auth.usuarioActual" [value]="auth.usuarioActual?.nombre" severity="info"></p-tag>
-    </div>
+  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+    <h2 style="margin: 0;">Gestión de Tickets</h2>
 
     <div style="display: flex; gap: 1rem; align-items: center;">
       <p-selectButton [options]="vistaOpciones" [(ngModel)]="vistaActual" optionValue="value">
         <ng-template let-item pTemplate><i [class]="item.icon"></i></ng-template>
       </p-selectButton>
 
-      <p-button *ngIf="auth.hasPermission('group:edit')" label="Miembros" icon="pi pi-users" severity="info" [outlined]="true" (click)="abrirGestionMiembros()"></p-button>
-      <p-button *ngIf="auth.hasPermission('ticket:add')" label="Nuevo Ticket" icon="pi pi-plus" severity="success" (click)="abrirNuevoTicket()"></p-button>
+      <p-button *appHasPermission="'ticket:add'" label="Nuevo Ticket" icon="pi pi-plus" severity="success" (click)="abrirNuevoTicket()"></p-button>
     </div>
-  </div>
-
-  <div style="display: flex; gap: 0.5rem; margin-bottom: 2rem; padding-bottom: 1rem; border-bottom: 1px solid #e2e8f0;">
-    <span style="font-weight: bold; margin-right: 1rem; align-self: center; color: #64748b;">Filtros Rápidos:</span>
-    <p-button label="Mis Tickets" icon="pi pi-user" [outlined]="filtroActual !== 'mis_tickets'" [severity]="filtroActual === 'mis_tickets' ? 'primary' : 'secondary'" (click)="aplicarFiltro('mis_tickets')" size="small"></p-button>
-    <p-button label="Sin Asignar" icon="pi pi-question" [outlined]="filtroActual !== 'sin_asignar'" severity="warning" (click)="aplicarFiltro('sin_asignar')" size="small"></p-button>
-    <p-button label="Prioridad Alta" icon="pi pi-exclamation-triangle" [outlined]="filtroActual !== 'prioridad_alta'" severity="danger" (click)="aplicarFiltro('prioridad_alta')" size="small"></p-button>
   </div>
 
   <div *ngIf="vistaActual === 'kanban'" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem;">
     <ng-container *ngFor="let estado of ['Pendiente', 'En progreso', 'Revisión', 'Finalizado']">
-      <div pDroppable="tickets" (onDrop)="drop($event, estado)" style="background: #f1f5f9; padding: 1rem; border-radius: 8px; min-height: 300px;">
+      <div pDroppable="tickets" (onDrop)="drop($event, estado)" style="background: #f1f5f9; padding: 1rem; border-radius: 8px; min-height: 400px;">
         <h4 style="margin-top: 0; padding-bottom: 0.5rem; border-bottom: 2px solid #cbd5e1;">{{ estado }}</h4>
 
-        <div *ngFor="let ticket of getTicketsByEstado(estado)" pDraggable="tickets" [pDraggableDisabled]="!puedeEditarEstadoYComentarios(ticket)" (onDragStart)="dragStart(ticket)" (onDragEnd)="dragEnd()" style="margin-bottom: 1rem;">          <p-card [header]="ticket.titulo" [subheader]="ticket.asignadoA" styleClass="p-card-shadow" (click)="verDetalleTicket(ticket)" [style]="{'cursor': puedeEditarEstadoYComentarios(ticket) ? 'grab' : 'not-allowed'}">
+        <div *ngFor="let ticket of getTicketsByEstado(estado)" pDraggable="tickets" [pDraggableDisabled]="!puedeEditarEstadoYComentarios(ticket)" (onDragStart)="dragStart(ticket)" (onDragEnd)="dragEnd()" style="margin-bottom: 1rem;">
+          <p-card [header]="ticket.titulo" [subheader]="ticket.asignadoA" styleClass="p-card-shadow" (click)="verDetalleTicket(ticket)" [style]="{'cursor': puedeEditarEstadoYComentarios(ticket) ? 'grab' : 'not-allowed'}">
             <p-tag [value]="ticket.prioridad" severity="warning" styleClass="mb-2"></p-tag>
             <p style="font-size: 0.85rem; color: #64748b; margin-top: 0.5rem;">FL: {{ ticket.fechaLimite }}</p>
           </p-card>
@@ -39,21 +29,35 @@
   </div>
 
   <div *ngIf="vistaActual === 'lista'">
-    <p-table [value]="ticketsFiltrados" [paginator]="true" [rows]="5" styleClass="p-datatable-striped">
+    <p-table [value]="tickets" [paginator]="true" [rows]="10" [globalFilterFields]="['titulo', 'asignadoA', 'estadoActual', 'prioridad']" styleClass="p-datatable-striped p-datatable-gridlines">
       <ng-template pTemplate="header">
         <tr>
-          <th pSortableColumn="titulo">Título <p-sortIcon field="titulo"></p-sortIcon></th>
-          <th pSortableColumn="estadoActual">Estado <p-sortIcon field="estadoActual"></p-sortIcon></th>
-          <th pSortableColumn="prioridad">Prioridad <p-sortIcon field="prioridad"></p-sortIcon></th>
-          <th>Acciones</th>
+          <th pSortableColumn="id" style="width: 10%">ID <p-sortIcon field="id"></p-sortIcon></th>
+          <th pSortableColumn="titulo" style="width: 25%">Título <p-sortIcon field="titulo"></p-sortIcon>
+            <p-columnFilter type="text" field="titulo" display="menu"></p-columnFilter>
+          </th>
+          <th pSortableColumn="estadoActual" style="width: 15%">Estado <p-sortIcon field="estadoActual"></p-sortIcon>
+            <p-columnFilter type="text" field="estadoActual" display="menu"></p-columnFilter>
+          </th>
+          <th pSortableColumn="prioridad" style="width: 15%">Prioridad <p-sortIcon field="prioridad"></p-sortIcon>
+            <p-columnFilter type="text" field="prioridad" display="menu"></p-columnFilter>
+          </th>
+          <th pSortableColumn="asignadoA" style="width: 20%">Asignado A <p-sortIcon field="asignadoA"></p-sortIcon>
+            <p-columnFilter type="text" field="asignadoA" display="menu"></p-columnFilter>
+          </th>
+          <th pSortableColumn="fechaCreacion" style="width: 10%">Fecha <p-sortIcon field="fechaCreacion"></p-sortIcon></th>
+          <th style="width: 5%">Ver</th>
         </tr>
       </ng-template>
       <ng-template pTemplate="body" let-ticket>
         <tr>
+          <td>{{ ticket.id }}</td>
           <td><strong>{{ ticket.titulo }}</strong></td>
           <td><p-tag [value]="ticket.estadoActual" [severity]="getSeverity(ticket.estadoActual)"></p-tag></td>
           <td>{{ ticket.prioridad }}</td>
-          <td>
+          <td>{{ ticket.asignadoA }}</td>
+          <td>{{ ticket.fechaCreacion }}</td>
+          <td style="text-align: center;">
             <p-button icon="pi pi-eye" [rounded]="true" [text]="true" (click)="verDetalleTicket(ticket)"></p-button>
           </td>
         </tr>
@@ -105,22 +109,5 @@
   <ng-template pTemplate="footer">
     <p-button label="Cerrar" icon="pi pi-times" [text]="true" (click)="displayTicketDialog = false"></p-button>
     <p-button *ngIf="puedeEditarEstadoYComentarios(ticketActual)" label="Guardar Cambios" icon="pi pi-check" (click)="guardarTicket()"></p-button>
-  </ng-template>
-</p-dialog>
-
-<p-dialog [(visible)]="displayMiembrosDialog" [style]="{width: '450px'}" header="Gestión de Miembros" [modal]="true">
-  <ng-template pTemplate="content">
-    <div style="display: flex; gap: 0.5rem; margin-bottom: 1.5rem; align-items: flex-end;">
-      <div style="flex-grow: 1;">
-        <label style="display: block; font-weight: bold; margin-bottom: 0.5rem;">Añadir usuario x email</label>
-        <input pInputText [(ngModel)]="nuevoMiembroEmail" placeholder="ejemplo@correo.com" style="width: 100%;" />
-      </div>
-      <p-button icon="pi pi-user-plus" severity="success" (click)="agregarMiembro()"></p-button>
-    </div>
-    <h4 style="border-bottom: 1px solid #e2e8f0; padding-bottom: 0.5rem;">Lista de Usuarios del Grupo</h4>
-    <div *ngFor="let m of miembros" style="display: flex; justify-content: space-between; align-items: center; padding: 0.5rem 0; border-bottom: 1px solid #f1f5f9;">
-      <span><i class="pi pi-user" style="margin-right: 0.5rem; color: #64748b;"></i> {{ m.email }}</span>
-      <p-button icon="pi pi-trash" severity="danger" [text]="true" [rounded]="true" (click)="eliminarMiembro(m.id)"></p-button>
-    </div>
   </ng-template>
 </p-dialog>

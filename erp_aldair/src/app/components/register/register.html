@@ -1,55 +1,63 @@
-<div class="auth-container">
-  <div class="card-custom" style="max-width: 600px;">
-    <h2 style="text-align: center;">Registro de Usuario</h2>
-    <form [formGroup]="registerForm" (ngSubmit)="onSubmit()" class="form-grid">
+<p-toast></p-toast>
+<div style="display: flex; justify-content: center; align-items: center; min-height: 100vh; background-color: #f8fafc; padding: 2rem;">
+  <p-card header="Crear Nueva Cuenta" [style]="{width: '600px', 'max-width': '100%'}" styleClass="p-card-shadow">
 
-      <div class="flex-col">
-        <label>Usuario</label>
-        <input pInputText formControlName="usuario" class="w-full" />
+    <form [formGroup]="registerForm" (ngSubmit)="onSubmit()">
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem;">
+
+        <div class="field">
+          <label style="display: block; margin-bottom: 0.5rem; font-weight: bold; color: #334155;">Usuario</label>
+          <input pInputText formControlName="usuario" style="width: 100%;" />
+        </div>
+
+        <div class="field">
+          <label style="display: block; margin-bottom: 0.5rem; font-weight: bold; color: #334155;">Nombre Completo</label>
+          <input pInputText formControlName="nombreCompleto" style="width: 100%;" />
+        </div>
+
+        <div class="field">
+          <label style="display: block; margin-bottom: 0.5rem; font-weight: bold; color: #334155;">Email</label>
+          <input pInputText type="email" formControlName="email" style="width: 100%;" />
+        </div>
+
+        <div class="field">
+          <label style="display: block; margin-bottom: 0.5rem; font-weight: bold; color: #334155;">Teléfono</label>
+          <input pInputText pKeyFilter="int" formControlName="telefono" style="width: 100%;" />
+        </div>
+
+        <div class="field" style="grid-column: span 2;">
+          <label style="display: block; margin-bottom: 0.5rem; font-weight: bold; color: #334155;">Dirección</label>
+          <input pInputText formControlName="direccion" style="width: 100%;" />
+        </div>
+
+        <div class="field" style="grid-column: span 2;">
+          <label style="display: block; margin-bottom: 0.5rem; font-weight: bold; color: #334155;">Fecha de Nacimiento</label>
+          <p-calendar formControlName="fechaNacimiento" [showIcon]="true" dateFormat="dd/mm/yy" styleClass="w-full"></p-calendar>
+          <small class="p-error" *ngIf="registerForm.get('fechaNacimiento')?.hasError('menorDeEdad') && registerForm.get('fechaNacimiento')?.touched" style="display: block; margin-top: 0.5rem;">
+            Debes ser mayor de 18 años.
+          </small>
+        </div>
+
+        <div class="field">
+          <label style="display: block; margin-bottom: 0.5rem; font-weight: bold; color: #334155;">Contraseña</label>
+          <p-password formControlName="password" [toggleMask]="true" [style]="{'width':'100%'}" [inputStyle]="{'width':'100%'}"></p-password>
+        </div>
+
+        <div class="field">
+          <label style="display: block; margin-bottom: 0.5rem; font-weight: bold; color: #334155;">Confirmar Contraseña</label>
+          <p-password formControlName="confirmarPassword" [feedback]="false" [toggleMask]="true" [style]="{'width':'100%'}" [inputStyle]="{'width':'100%'}"></p-password>
+          <small class="p-error" *ngIf="registerForm.hasError('notSame') && registerForm.get('confirmarPassword')?.touched" style="display: block; margin-top: 0.5rem;">
+            Las contraseñas no coinciden.
+          </small>
+        </div>
+
       </div>
 
-      <div class="flex-col">
-        <label>Nombre Completo</label>
-        <input pInputText formControlName="nombreCompleto" class="w-full" />
-      </div>
-
-      <div class="flex-col col-span-2">
-        <label>Email</label>
-        <input pInputText formControlName="email" type="email" class="w-full" />
-      </div>
-
-      <div class="flex-col">
-        <label>Teléfono</label>
-        <input pInputText formControlName="telefono" pKeyFilter="int" class="w-full" />
-      </div>
-
-      <div class="flex-col">
-        <label>Fecha de Nacimiento</label>
-        <p-calendar formControlName="fechaNacimiento" [showIcon]="true" appendTo="body" dateFormat="dd/mm/yy" styleClass="w-full"></p-calendar>
-        <small class="p-error" *ngIf="registerForm.get('fechaNacimiento')?.errors?.['menorDeEdad']">Es menor de edad</small>
-      </div>
-
-      <div class="flex-col col-span-2">
-        <label>Dirección</label>
-        <input pInputText formControlName="direccion" class="w-full" />
-      </div>
-
-      <div class="flex-col">
-        <label>Contraseña</label>
-        <p-password formControlName="password" [toggleMask]="true" styleClass="w-full" inputStyleClass="w-full"></p-password>
-        <small class="p-error" *ngIf="registerForm.get('password')?.errors?.['pattern']">Requiere min 10 caracteres y 1 símbolo</small>
-      </div>
-
-      <div class="flex-col">
-        <label>Confirmar</label>
-        <p-password formControlName="confirmarPassword" [toggleMask]="true" [feedback]="false" styleClass="w-full" inputStyleClass="w-full"></p-password>
-        <small class="p-error" *ngIf="registerForm.errors?.['notSame']">Las contraseñas no coinciden</small>
-      </div>
-
-      <div class="col-span-2 mt-1">
-        <p-button label="Registrarse" type="submit" [disabled]="registerForm.invalid" styleClass="w-full"></p-button>
-        <p-button label="Volver al Login" [link]="true" routerLink="/login" styleClass="w-full"></p-button>
+      <div style="display: flex; gap: 1rem; justify-content: flex-end; margin-top: 2rem;">
+        <p-button label="Cancelar" [text]="true" severity="secondary" routerLink="/login"></p-button>
+        <p-button label="Registrar Cuenta" type="submit" [disabled]="registerForm.invalid"></p-button>
       </div>
     </form>
-  </div>
+
+  </p-card>
 </div>
