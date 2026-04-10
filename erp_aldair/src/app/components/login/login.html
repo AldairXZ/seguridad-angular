@@ -1,0 +1,18 @@
+<p-toast></p-toast>
+<div style="display: flex; justify-content: center; align-items: center; height: 100vh; background-color: #f8fafc;">
+  <p-card header="Iniciar Sesión" [style]="{width: '400px'}" styleClass="p-card-shadow">
+
+    <div class="field" style="margin-bottom: 1.5rem;">
+      <label style="display: block; margin-bottom: 0.5rem; font-weight: bold; color: #334155;">Correo Electrónico</label>
+      <input type="email" pInputText [(ngModel)]="email" placeholder="ejemplo@correo.com" style="width: 100%;" />
+    </div>
+
+    <div class="field" style="margin-bottom: 2rem;">
+      <label style="display: block; margin-bottom: 0.5rem; font-weight: bold; color: #334155;">Contraseña</label>
+      <p-password [(ngModel)]="pass" [feedback]="false" placeholder="********" [style]="{'width':'100%'}" [inputStyle]="{'width':'100%'}"></p-password>
+    </div>
+
+    <p-button label="Ingresar al ERP" icon="pi pi-sign-in" styleClass="w-full" (click)="iniciarSesion()"></p-button>
+
+  </p-card>
+</div>

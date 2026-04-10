@@ -45,7 +45,7 @@
       <div style="display: flex; justify-content: flex-end; gap: 1rem; margin-top: 1rem;">
         <p-button label="Actualizar Datos" icon="pi pi-check" severity="success" (click)="actualizarUsuario()"></p-button>
         <p-button label="Eliminar Cuenta" icon="pi pi-trash" [outlined]="true" severity="danger" (click)="eliminarCuenta()"></p-button>
-        <p-button label="Salir" icon="pi pi-sign-out" [text]="true" severity="secondary" routerLink="/login"></p-button>
+        <p-button label="Salir" icon="pi pi-sign-out" [text]="true" severity="secondary" (click)="auth.logout()"></p-button>
       </div>
     </ng-template>
   </p-card>

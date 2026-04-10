@@ -29,12 +29,45 @@ export class VistaGrupoComponent {
   ];
   vistaActual: string = 'kanban';
   filtroActual: string | null = null;
-  usuarioLogueado: string = 'Aldair';
 
+  // TICKETS DE PRUEBA PERFECTOS
   tickets: any[] = [
-    { titulo: 'Diseño de Base de Datos', descripcion: 'Crear esquema', estadoActual: 'En progreso', autor: 'Juan', asignadoA: 'Aldair', prioridad: 'Alta', fechaCreacion: '2026-03-01', fechaLimite: '2026-03-10', comentarios: 'Revisar normalización', historialCambios: 'Pendiente -> En progreso' },
-    { titulo: 'Crear Landing Page', descripcion: 'Maquetar página', estadoActual: 'Finalizado', autor: 'Aldair', asignadoA: 'Juan', prioridad: 'Media', fechaCreacion: '2026-03-02', fechaLimite: '2026-03-05', comentarios: 'Aprobado', historialCambios: 'En progreso -> Finalizado' },
-    { titulo: 'Configurar Servidor', descripcion: 'AWS Setup', estadoActual: 'Pendiente', autor: 'Aldair', asignadoA: '', prioridad: 'Urgente', fechaCreacion: '2026-03-12', fechaLimite: '2026-03-20', comentarios: '', historialCambios: 'Creado' }
+    {
+      titulo: '1. Ticket de Juan',
+      descripcion: '',
+      estadoActual: 'Pendiente',
+      autor: 'Aldair',
+      asignadoA: 'Juan',
+      prioridad: 'Media',
+      fechaCreacion: '2026-03-13',
+      fechaLimite: '2026-03-20',
+      comentarios: '',
+      historialCambios: 'Creado'
+    },
+    {
+      titulo: '2. Ticket para Juan',
+      descripcion: '',
+      estadoActual: 'En progreso',
+      autor: 'Aldair',
+      asignadoA: 'Juan',
+      prioridad: 'Alta',
+      fechaCreacion: '2026-03-10',
+      fechaLimite: '2026-03-15',
+      comentarios: 'Juan: Ya casi lo termino.',
+      historialCambios: 'Pendiente -> En progreso'
+    },
+    {
+      titulo: '3. Ticket de otros',
+      descripcion: '',
+      estadoActual: 'Revisión',
+      autor: 'Aldair',
+      asignadoA: 'Super Admin',
+      prioridad: 'Urgente',
+      fechaCreacion: '2026-03-01',
+      fechaLimite: '2026-03-10',
+      comentarios: '',
+      historialCambios: 'En progreso -> Revisión'
+    }
   ];
 
   displayTicketDialog: boolean = false;
@@ -53,6 +86,10 @@ export class VistaGrupoComponent {
 
   constructor(public auth: AuthService) {}
 
+  get usuarioLogueado() {
+    return this.auth.usuarioActual?.nombre || '';
+  }
+
   esCreador(ticket: any): boolean {
     return ticket.autor === this.usuarioLogueado;
   }
@@ -62,11 +99,11 @@ export class VistaGrupoComponent {
   }
 
   puedeEditarCamposBase(ticket: any): boolean {
-    return this.esCreador(ticket) || this.auth.role === 'admin' || this.auth.role === 'superAdmin';
+    return this.esCreador(ticket) || this.auth.hasPermission('ticket:edit');
   }
 
   puedeEditarEstadoYComentarios(ticket: any): boolean {
-    return this.esCreador(ticket) || this.esAsignado(ticket) || this.auth.role === 'admin' || this.auth.role === 'superAdmin';
+    return this.esCreador(ticket) || this.esAsignado(ticket) || this.auth.hasPermission('ticket:edit');
   }
 
   abrirNuevoTicket() {

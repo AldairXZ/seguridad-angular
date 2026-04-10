@@ -3,7 +3,7 @@
   <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
     <div style="display: flex; gap: 1rem; align-items: center;">
       <h2 style="margin: 0;">Gestión de Grupo: Alpha</h2>
-      <p-tag [value]="auth.role" [severity]="auth.role === 'admin' ? 'danger' : 'info'"></p-tag>
+      <p-tag *ngIf="auth.usuarioActual" [value]="auth.usuarioActual?.nombre" severity="info"></p-tag>
     </div>
 
     <div style="display: flex; gap: 1rem; align-items: center;">
@@ -27,12 +27,13 @@
     <ng-container *ngFor="let estado of ['Pendiente', 'En progreso', 'Revisión', 'Finalizado']">
       <div pDroppable="tickets" (onDrop)="drop($event, estado)" style="background: #f1f5f9; padding: 1rem; border-radius: 8px; min-height: 300px;">
         <h4 style="margin-top: 0; padding-bottom: 0.5rem; border-bottom: 2px solid #cbd5e1;">{{ estado }}</h4>
-        <div *ngFor="let ticket of getTicketsByEstado(estado)" pDraggable="tickets" (onDragStart)="dragStart(ticket)" (onDragEnd)="dragEnd()" style="margin-bottom: 1rem;">
-          <p-card [header]="ticket.titulo" [subheader]="ticket.asignadoA" styleClass="p-card-shadow" (click)="verDetalleTicket(ticket)" [style]="{'cursor': puedeEditarEstadoYComentarios(ticket) ? 'grab' : 'pointer'}">
+
+        <div *ngFor="let ticket of getTicketsByEstado(estado)" pDraggable="tickets" [pDraggableDisabled]="!puedeEditarEstadoYComentarios(ticket)" (onDragStart)="dragStart(ticket)" (onDragEnd)="dragEnd()" style="margin-bottom: 1rem;">          <p-card [header]="ticket.titulo" [subheader]="ticket.asignadoA" styleClass="p-card-shadow" (click)="verDetalleTicket(ticket)" [style]="{'cursor': puedeEditarEstadoYComentarios(ticket) ? 'grab' : 'not-allowed'}">
             <p-tag [value]="ticket.prioridad" severity="warning" styleClass="mb-2"></p-tag>
             <p style="font-size: 0.85rem; color: #64748b; margin-top: 0.5rem;">FL: {{ ticket.fechaLimite }}</p>
           </p-card>
         </div>
+
       </div>
     </ng-container>
   </div>

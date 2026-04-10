@@ -1,37 +1,70 @@
 import { Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Router } from '@angular/router';
+import { Observable } from 'rxjs';
+import { tap } from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
-  role: 'admin' | 'common' | 'superAdmin' = 'common';
+  private apiUrl = 'https://spatial-delcine-devemma-edfc3f92.koyeb.app';
 
-  commonUser = [
-    'group:view',
-    'ticket:view',
-    'ticket:edit_state',
-    'user:view',
-    'user:edit'
-  ];
+  usuariosDb: any[] = [];
+  usuarioActual: any = null;
 
-  adminUser = [
-    'group:view', 'group:edit', 'group:add', 'group:delete',
-    'ticket:view', 'ticket:edit', 'ticket:add', 'ticket:delete', 'ticket:edit_state',
-    'user:view', 'users:view', 'user:edit', 'user:add', 'user:delete'
-  ];
-
-  hasPermission(permission: string): boolean {
-    const perms = this.role === 'common' ? this.commonUser : this.adminUser;
-    return perms.includes(permission);
+  constructor(private http: HttpClient, private router: Router) {
+    this.cargarDatosGuardados();
   }
 
-  toggleRole() {
-    if (this.role === 'common') {
-      this.role = 'admin';
-    } else if (this.role === 'admin') {
-      this.role = 'superAdmin';
-    } else {
-      this.role = 'common';
+  cargarDatosGuardados() {
+    const sesionGuardada = localStorage.getItem('erp_sesion_actual');
+    if (sesionGuardada) {
+      this.usuarioActual = JSON.parse(sesionGuardada);
     }
+
+    const dbGuardada = localStorage.getItem('erp_usuarios_db');
+    if (dbGuardada) {
+      this.usuariosDb = JSON.parse(dbGuardada);
+    }
+  }
+
+  guardarBaseDeDatos() {
+    localStorage.setItem('erp_usuarios_db', JSON.stringify(this.usuariosDb));
+  }
+
+  login(email: string, pass: string): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}/login`, { email: email, password: pass }).pipe(
+      tap(response => {
+        const rawPermisos = response.permissions || response.user?.permissions || [];
+        const permisosAdaptados = [...rawPermisos];
+
+        if (permisosAdaptados.includes('ticket:edit:state')) {
+          permisosAdaptados.push('ticket:edit_state');
+        }
+        if (permisosAdaptados.includes('user:manage')) {
+          permisosAdaptados.push('users:view');
+        }
+
+        this.usuarioActual = {
+          id: Date.now(),
+          nombre: email.split('@')[0],
+          email: email,
+          permisos: permisosAdaptados
+        };
+
+        localStorage.setItem('erp_sesion_actual', JSON.stringify(this.usuarioActual));
+      })
+    );
+  }
+
+  logout() {
+    this.usuarioActual = null;
+    localStorage.removeItem('erp_sesion_actual');
+    this.router.navigate(['/login']);
+  }
+
+  hasPermission(permission: string): boolean {
+    return this.usuarioActual ? this.usuarioActual.permisos.includes(permission) : false;
   }
 }

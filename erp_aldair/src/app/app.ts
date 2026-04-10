@@ -4,6 +4,7 @@ import { SidebarModule } from 'primeng/sidebar';
 import { ButtonModule } from 'primeng/button';
 import { CommonModule } from '@angular/common';
 import { filter } from 'rxjs/operators';
+import { AuthService } from './services/auth';
 
 @Component({
   selector: 'app-root',
@@ -19,7 +20,7 @@ export class AppComponent {
   showMenu: boolean = false;
   rutaActual: string = 'Home';
 
-  constructor(private router: Router) {
+  constructor(private router: Router, public auth: AuthService) {
     this.router.events.pipe(
       filter(event => event instanceof NavigationEnd)
     ).subscribe((event: any) => {
@@ -33,6 +34,8 @@ export class AppComponent {
         this.rutaActual = 'Home / User';
       } else if (url.includes('/group')) {
         this.rutaActual = 'Home / Group';
+      } else if (url.includes('/gestion-usuarios')) {
+        this.rutaActual = 'Home / Super Admin';
       } else if (url.includes('/vista-grupo')) {
         this.rutaActual = 'Home / Group / Ticket';
       } else {

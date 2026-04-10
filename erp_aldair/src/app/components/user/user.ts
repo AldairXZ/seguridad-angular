@@ -10,6 +10,7 @@ import { ToastModule } from 'primeng/toast';
 import { MessageService } from 'primeng/api';
 import { TableModule } from 'primeng/table';
 import { TagModule } from 'primeng/tag';
+import { AuthService } from '../../services/auth';
 
 @Component({
   selector: 'app-user',
@@ -46,7 +47,7 @@ export class UserComponent {
     { titulo: 'Maquetar vistas faltantes', estado: 'En progreso', prioridad: 'Alta', fecha: '2026-03-18' }
   ];
 
-  constructor(private messageService: MessageService) {}
+  constructor(private messageService: MessageService, public auth: AuthService) {}
 
   get stats() {
     return {

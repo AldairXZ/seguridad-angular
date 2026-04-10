@@ -1,0 +1,10 @@
+============================================================
+ENTREGA PRÁCTICA
+============================================================
+ALUMNO Aldair Stefano Rodriguez Pedrez
+PROYECTO erp_aldair
+
+LINK DEL REPOSITORIO
+https://github.com/AldairXZ/seguridad-angular
+
+============================================================

@@ -3,7 +3,7 @@
   "version": 1,
   "newProjectRoot": "projects",
   "projects": {
-    "practica_sg1": {
+    "erp_aldair_practica3": {
       "projectType": "application",
       "schematics": {},
       "root": "",
@@ -14,9 +14,6 @@
           "builder": "@angular/build:application",
           "options": {
             "browser": "src/main.ts",
-            "polyfills": [
-              "zone.js"
-            ],
             "tsConfig": "tsconfig.app.json",
             "assets": [
               {
@@ -25,7 +22,6 @@
               }
             ],
             "styles": [
-              "node_modules/primeicons/primeicons.css",
               "src/styles.css"
             ]
           },
@@ -57,10 +53,10 @@
           "builder": "@angular/build:dev-server",
           "configurations": {
             "production": {
-              "buildTarget": "practica_sg1:build:production"
+              "buildTarget": "erp_aldair_practica3:build:production"
             },
             "development": {
-              "buildTarget": "practica_sg1:build:development"
+              "buildTarget": "erp_aldair_practica3:build:development"
             }
           },
           "defaultConfiguration": "development"
@@ -71,10 +67,6 @@
         "test": {
           "builder": "@angular/build:karma",
           "options": {
-            "polyfills": [
-              "zone.js",
-              "zone.js/testing"
-            ],
             "tsConfig": "tsconfig.spec.json",
             "assets": [
               {

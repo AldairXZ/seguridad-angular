@@ -4,8 +4,7 @@
   <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
     <div style="display: flex; gap: 1rem; align-items: center;">
       <h2 style="margin: 0; color: #334155;">Control de Grupos (CRUD)</h2>
-      <p-tag [value]="auth.role" [severity]="auth.role === 'admin' ? 'danger' : 'info'"></p-tag>
-      <p-button label="Cambiar Rol (Prueba)" [text]="true" size="small" (click)="auth.toggleRole()"></p-button>
+      <p-tag *ngIf="auth.usuarioActual" [value]="auth.usuarioActual?.nombre" severity="info"></p-tag>
     </div>
 
     <p-button *ngIf="auth.hasPermission('group:add')" label="Nuevo Grupo" icon="pi pi-plus" severity="success" (click)="abrirNuevo()"></p-button>

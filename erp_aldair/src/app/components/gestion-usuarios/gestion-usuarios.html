@@ -2,8 +2,8 @@
 <div style="padding: 2rem; max-width: 1200px; margin: 0 auto;">
 
   <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
-    <h2 style="margin: 0; color: #334155;">Gestión de Usuarios (SuperAdmin)</h2>
-    <p-button label="Nuevo Usuario" icon="pi pi-plus" severity="success" (click)="abrirNuevo()"></p-button>
+    <h2 style="margin: 0; color: #334155;">Gestión de Usuarios y Permisos</h2>
+    <p-button *ngIf="auth.hasPermission('user:add')" label="Nuevo Usuario" icon="pi pi-plus" severity="success" (click)="abrirNuevo()"></p-button>
   </div>
 
   <p-table [value]="usuarios" [paginator]="true" [rows]="5" styleClass="p-datatable-striped">
@@ -11,7 +11,6 @@
       <tr>
         <th>Nombre</th>
         <th>Email</th>
-        <th>Rol</th>
         <th>Permisos Asignados</th>
         <th style="text-align: center;">Acciones</th>
       </tr>
@@ -21,12 +20,11 @@
         <td><strong>{{ u.nombre }}</strong></td>
         <td>{{ u.email }}</td>
         <td>
-          <p-tag [value]="u.rol" [severity]="u.rol === 'superAdmin' ? 'danger' : (u.rol === 'admin' ? 'info' : 'success')"></p-tag>
+          <p-tag [value]="u.permisos.length + ' permisos activos'" severity="info"></p-tag>
         </td>
-        <td>{{ u.permisos.length }} permisos activos</td>
         <td style="text-align: center;">
-          <p-button icon="pi pi-pencil" [rounded]="true" [text]="true" severity="info" (click)="editarUsuario(u)"></p-button>
-          <p-button icon="pi pi-trash" [rounded]="true" [text]="true" severity="danger" (click)="eliminarUsuario(u)"></p-button>
+          <p-button *ngIf="auth.hasPermission('user:edit')" icon="pi pi-pencil" [rounded]="true" [text]="true" severity="info" (click)="editarUsuario(u)"></p-button>
+          <p-button *ngIf="auth.hasPermission('user:delete')" icon="pi pi-trash" [rounded]="true" [text]="true" severity="danger" (click)="eliminarUsuario(u)"></p-button>
         </td>
       </tr>
     </ng-template>
@@ -41,18 +39,14 @@
       <input pInputText [(ngModel)]="usuarioActual.nombre" />
     </div>
 
-    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem;">
+    <div style="display: grid; grid-template-columns: 1fr; gap: 1rem; margin-bottom: 1.5rem;">
       <div class="field">
         <label style="font-weight: bold; display: block; margin-bottom: 0.5rem;">Email</label>
         <input pInputText [(ngModel)]="usuarioActual.email" />
       </div>
-      <div class="field">
-        <label style="font-weight: bold; display: block; margin-bottom: 0.5rem;">Rol del Sistema</label>
-        <input pInputText [(ngModel)]="usuarioActual.rol" />
-      </div>
     </div>
 
-    <h4 style="margin-top: 1rem; border-bottom: 1px solid #e2e8f0; padding-bottom: 0.5rem; color: #334155;">Asignación de Permisos (RBAC)</h4>
+    <h4 style="margin-top: 1rem; border-bottom: 1px solid #e2e8f0; padding-bottom: 0.5rem; color: #334155;">Asignación de Permisos Especiales</h4>
 
     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 1rem;">
       <div *ngFor="let perm of permisosDisponibles" style="display: flex; align-items: center; gap: 0.5rem;">
