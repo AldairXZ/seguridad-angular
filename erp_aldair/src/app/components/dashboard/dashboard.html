@@ -2,19 +2,19 @@
   <div style="max-width: 1200px; margin: 0 auto;">
 
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; background: white; padding: 1.5rem; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
-      <h2 style="color: #334155; margin: 0;">Dashboard Principal</h2>
+      <h2 style="color: #334155; margin: 0;">Dashboard de Control</h2>
 
       <div style="display: flex; align-items: center; gap: 1rem;">
-        <span style="font-weight: bold; color: #64748b;">Seleccionar Workspace:</span>
-        <p-dropdown [options]="grupos" [(ngModel)]="grupoSeleccionado" optionLabel="nombre" placeholder="Elige un grupo..." (onChange)="onGrupoChange($event)" styleClass="w-15rem"></p-dropdown>
+        <span style="font-weight: bold; color: #64748b;">Contexto Global:</span>
+        <p-dropdown [options]="grupos" [(ngModel)]="grupoSeleccionado" optionLabel="nombre" placeholder="Cargando grupos..." (onChange)="onGrupoChange($event)" styleClass="w-15rem" [showClear]="false"></p-dropdown>
       </div>
     </div>
 
     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
 
-      <p-card header="Resumen General" styleClass="p-card-shadow" [style]="{height: '100%'}">
+      <p-card header="Resumen de Tickets" styleClass="p-card-shadow" [style]="{height: '100%'}">
         <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 1rem 0;">
-          <span style="font-size: 1.2rem; color: #64748b; margin-bottom: 0.5rem;">Total Acumulado</span>
+          <span style="font-size: 1.2rem; color: #64748b; margin-bottom: 0.5rem;">Volumen Total del Contexto</span>
           <span style="font-size: 4rem; font-weight: bold; color: #1e293b; line-height: 1; margin-bottom: 1rem;">
             {{ totalTickets }}
           </span>
@@ -24,14 +24,16 @@
         </div>
       </p-card>
 
-      <p-card header="Estadísticas por Status" styleClass="p-card-shadow" [style]="{height: '100%'}">
-        <div style="display: flex; justify-content: center;">
-          <p-chart type="doughnut" [data]="pieData" [options]="pieOptions" width="220px" height="220px"></p-chart>
+      <p-card header="Distribución de Estados" styleClass="p-card-shadow" [style]="{height: '100%'}">
+        <div style="height: 250px; position: relative; width: 100%; display: flex; justify-content: center;">
+          <p-chart type="doughnut" [data]="pieData" [options]="pieOptions" width="250px" height="250px"></p-chart>
         </div>
       </p-card>
 
-      <p-card header="Tickets Creados (Semana)" styleClass="p-card-shadow" [style]="{height: '100%'}">
-        <p-chart type="bar" [data]="barData" [options]="barOptions" height="220px"></p-chart>
+      <p-card header="Métricas de Carga" styleClass="p-card-shadow" [style]="{height: '100%'}">
+        <div style="height: 250px; position: relative; width: 100%;">
+          <p-chart type="bar" [data]="barData" [options]="barOptions" height="250px"></p-chart>
+        </div>
       </p-card>
 
     </div>
@@ -39,16 +41,16 @@
     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem;">
 
       <p-card subheader="Gestión de Perfil" styleClass="p-card-shadow">
-        <p style="color: #64748b;">Visualiza y administra los datos del usuario actual.</p>
+        <p style="color: #64748b;">Visualiza y administra los datos del usuario actual y los permisos heredados del JWT.</p>
         <ng-template pTemplate="footer">
-          <p-button label="Ir a Usuarios" icon="pi pi-user" routerLink="/user" styleClass="w-full" [outlined]="true"></p-button>
+          <p-button label="Ver Perfil" icon="pi pi-user" routerLink="/user" styleClass="w-full" [outlined]="true"></p-button>
         </ng-template>
       </p-card>
 
-      <p-card subheader="Control de Grupos" styleClass="p-card-shadow">
-        <p style="color: #64748b;">Administra los proyectos y accede a los tableros Kanban.</p>
+      <p-card subheader="Tableros Operativos" styleClass="p-card-shadow">
+        <p style="color: #64748b;">Accede directamente al tablero Kanban del contexto que seleccionaste arriba.</p>
         <ng-template pTemplate="footer">
-          <p-button label="Ver Grupos" icon="pi pi-users" severity="success" routerLink="/group" styleClass="w-full"></p-button>
+          <p-button label="Ir al Tablero (Kanban)" icon="pi pi-th-large" severity="success" routerLink="/vista-grupo" styleClass="w-full"></p-button>
         </ng-template>
       </p-card>
 

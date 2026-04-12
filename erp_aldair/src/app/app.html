@@ -10,7 +10,9 @@
       <div style="color: #4ade80; font-weight: bold; border: 1px solid #4ade80; padding: 0.3rem 0.8rem; border-radius: 20px;">
         {{ rutaActual }}
       </div>
-      <p-button icon="pi pi-user" [rounded]="true" severity="info" routerLink="/user" title="Mi Perfil"></p-button>
+      <ng-container *appHasPermission="'user:view'">
+        <p-button icon="pi pi-user" [rounded]="true" severity="info" routerLink="/user" title="Mi Perfil"></p-button>
+      </ng-container>
     </div>
 
   </div>
@@ -21,11 +23,15 @@
           <hr>
           <div style="display: flex; flex-direction: column; gap: 0.5rem;">
 
-              <p-button label="Dashboard" icon="pi pi-home" [link]="true" routerLink="/dashboard" (click)="sidebarVisible = false"></p-button>
+              <p-button label="Dashboard" icon="pi pi-home" [text]="true" routerLink="/dashboard" (click)="sidebarVisible = false"></p-button>
 
-              <p-button *ngIf="auth.hasPermission('group:view')" label="Grupos" icon="pi pi-users" [link]="true" routerLink="/group" (click)="sidebarVisible = false"></p-button>
+              <ng-container *appHasPermission="'group:view'">
+                <p-button label="Grupos" icon="pi pi-users" [text]="true" routerLink="/group" (click)="sidebarVisible = false"></p-button>
+              </ng-container>
 
-              <p-button *ngIf="auth.hasPermission('users:view')" label="Super Admin" icon="pi pi-lock" [link]="true" severity="danger" routerLink="/gestion-usuarios" (click)="sidebarVisible = false"></p-button>
+              <ng-container *appHasPermission="'users:manage'">
+                <p-button label="Super Admin" icon="pi pi-lock" [text]="true" severity="danger" routerLink="/gestion-usuarios" (click)="sidebarVisible = false"></p-button>
+              </ng-container>
 
           </div>
           <div style="position: absolute; bottom: 20px; left: 20px;">

@@ -1,14 +1,15 @@
+<p-toast></p-toast>
 <div style="padding: 2rem;">
 
   <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
-    <h2 style="margin: 0;">Gestión de Tickets</h2>
+    <h2 style="margin: 0;">Gestión de Tickets - {{ groupName }}</h2>
 
     <div style="display: flex; gap: 1rem; align-items: center;">
       <p-selectButton [options]="vistaOpciones" [(ngModel)]="vistaActual" optionValue="value">
         <ng-template let-item pTemplate><i [class]="item.icon"></i></ng-template>
       </p-selectButton>
 
-      <p-button *appHasPermission="'ticket:add'" label="Nuevo Ticket" icon="pi pi-plus" severity="success" (click)="abrirNuevoTicket()"></p-button>
+      <p-button *appHasPermission="'tickets:add'" label="Nuevo Ticket" icon="pi pi-plus" severity="success" (click)="abrirNuevoTicket()"></p-button>
     </div>
   </div>
 

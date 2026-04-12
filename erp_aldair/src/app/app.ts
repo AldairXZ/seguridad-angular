@@ -5,11 +5,12 @@ import { ButtonModule } from 'primeng/button';
 import { CommonModule } from '@angular/common';
 import { filter } from 'rxjs/operators';
 import { AuthService } from './services/auth';
+import { HasPermissionDirective } from './directives/has-permission.directive';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [CommonModule, RouterOutlet, RouterModule, SidebarModule, ButtonModule],
+  imports: [CommonModule, RouterOutlet, RouterModule, SidebarModule, ButtonModule, HasPermissionDirective],
   templateUrl: './app.html'
 })
 export class AppComponent {

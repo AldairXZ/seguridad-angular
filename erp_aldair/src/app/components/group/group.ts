@@ -1,6 +1,7 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { TableModule } from 'primeng/table';
 import { ButtonModule } from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
@@ -16,31 +17,37 @@ import { HasPermissionDirective } from '../../directives/has-permission.directiv
   selector: 'app-group',
   standalone: true,
   imports: [
-    CommonModule,
-    FormsModule,
-    TableModule,
-    ButtonModule,
-    InputTextModule,
-    DialogModule,
-    ToastModule,
-    RouterModule,
-    TagModule,
-    HasPermissionDirective
+    CommonModule, FormsModule, TableModule, ButtonModule,
+    InputTextModule, DialogModule, ToastModule, RouterModule,
+    TagModule, HasPermissionDirective
   ],
   providers: [MessageService],
   templateUrl: './group.html'
 })
-export class GroupComponent {
-  grupos: any[] = [
-    { id: 1, nombre: 'Proyecto Alpha', categoria: 'Desarrollo', nivel: 'Alto', autor: 'Aldair', miembros: 5, tickets: 12 },
-    { id: 2, nombre: 'Soporte TI', categoria: 'Mantenimiento', nivel: 'Medio', autor: 'Juan', miembros: 3, tickets: 8 }
-  ];
-
+export class GroupComponent implements OnInit {
+  apiUrl = 'http://localhost:3000/api/groups';
+  grupos: any[] = [];
   grupoDialog: boolean = false;
   grupo: any = {};
   submitted: boolean = false;
 
-  constructor(private messageService: MessageService, public auth: AuthService) {}
+  constructor(private messageService: MessageService, public auth: AuthService, private http: HttpClient) {}
+
+  ngOnInit() {
+    this.cargarGrupos();
+  }
+
+  private getHeaders() {
+    const token = document.cookie.split('; ').find(row => row.startsWith('erp_token='))?.split('=')[1];
+    return new HttpHeaders().set('Authorization', `Bearer ${token}`);
+  }
+
+  cargarGrupos() {
+    this.http.get<any>(this.apiUrl, { headers: this.getHeaders() }).subscribe({
+      next: (res) => this.grupos = res.data,
+      error: () => this.messageService.add({ severity: 'error', summary: 'Error', detail: 'No se pudieron cargar los grupos' })
+    });
+  }
 
   abrirNuevo() {
     this.grupo = {};
@@ -54,8 +61,13 @@ export class GroupComponent {
   }
 
   eliminarGrupo(g: any) {
-    this.grupos = this.grupos.filter(val => val.id !== g.id);
-    this.messageService.add({ severity: 'success', summary: 'Eliminado', detail: 'Grupo borrado correctamente', life: 3000 });
+    this.http.delete(`${this.apiUrl}/${g.id}`, { headers: this.getHeaders() }).subscribe({
+      next: () => {
+        this.grupos = this.grupos.filter(val => val.id !== g.id);
+        this.messageService.add({ severity: 'success', summary: 'Eliminado', detail: 'Grupo borrado de la base de datos' });
+      },
+      error: () => this.messageService.add({ severity: 'error', summary: 'Bloqueado', detail: 'No tienes permiso para borrar grupos' })
+    });
   }
 
   ocultarDialogo() {
@@ -68,17 +80,25 @@ export class GroupComponent {
 
     if (this.grupo.nombre?.trim()) {
       if (this.grupo.id) {
-        this.grupos[this.grupos.findIndex(g => g.id === this.grupo.id)] = this.grupo;
-        this.messageService.add({ severity: 'success', summary: 'Actualizado', detail: 'Grupo modificado con éxito', life: 3000 });
+        this.http.put<any>(`${this.apiUrl}/${this.grupo.id}`, this.grupo, { headers: this.getHeaders() }).subscribe({
+          next: (res) => {
+            const index = this.grupos.findIndex(g => g.id === this.grupo.id);
+            this.grupos[index] = res.data[0];
+            this.grupoDialog = false;
+            this.messageService.add({ severity: 'success', summary: 'Actualizado', detail: 'Grupo modificado en servidor' });
+          },
+          error: () => this.messageService.add({ severity: 'error', summary: 'Bloqueado', detail: 'Permisos insuficientes' })
+        });
       } else {
-        this.grupo.id = this.grupos.length > 0 ? Math.max(...this.grupos.map(g => g.id)) + 1 : 1;
-        this.grupos.push(this.grupo);
-        this.messageService.add({ severity: 'success', summary: 'Creado', detail: 'Nuevo grupo registrado', life: 3000 });
+        this.http.post<any>(this.apiUrl, this.grupo, { headers: this.getHeaders() }).subscribe({
+          next: (res) => {
+            this.grupos.push(res.data[0]);
+            this.grupoDialog = false;
+            this.messageService.add({ severity: 'success', summary: 'Creado', detail: 'Grupo sincronizado con servidor' });
+          },
+          error: (err) => this.messageService.add({ severity: 'error', summary: 'Error', detail: err.error?.data?.[0]?.message || 'Permisos insuficientes' })
+        });
       }
-
-      this.grupos = [...this.grupos];
-      this.grupoDialog = false;
-      this.grupo = {};
     }
   }
 }
