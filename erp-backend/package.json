@@ -1,0 +1,11 @@
+{
+  "name": "erp-backend-network",
+  "version": "1.0.0",
+  "description": "Red de microservicios ERP",
+  "scripts": {
+    "start": "concurrently -n \"GATEWAY,USERS,TICKETS,GROUPS\" -c \"bgBlue.bold,bgMagenta.bold,bgGreen.bold,bgYellow.bold\" \"cd apigateway && node server.js\" \"cd user-service && node server.js\" \"cd tickets-service && node server.js\" \"cd groups-service && node server.js\""
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}

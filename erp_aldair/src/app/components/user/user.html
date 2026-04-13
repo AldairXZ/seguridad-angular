@@ -1,46 +1,70 @@
-<p-toast></p-toast>
+<div style="padding: 2rem; background: #f8fafc; min-height: calc(100vh - 70px);">
+    <div style="max-width: 800px; margin: 0 auto;">
 
-<div style="padding: 2rem; max-width: 800px; margin: 0 auto;">
-  <p-card styleClass="p-card-shadow">
-    <ng-template pTemplate="title">
-      <div style="display: flex; align-items: center; gap: 1rem;">
-        <p-avatar icon="pi pi-user" size="xlarge" shape="circle" [style]="{'background-color': '#002D72', 'color': '#ffffff'}"></p-avatar>
-        <span style="font-size: 1.5rem; color: #334155;">Mi Perfil de Acceso</span>
-      </div>
-    </ng-template>
+        <p-card styleClass="p-card-shadow border-round-xl">
+            <div class="flex align-items-center gap-4 mb-4">
+                <p-avatar
+                    [label]="usuario?.nombre?.charAt(0)"
+                    size="xlarge"
+                    shape="circle"
+                    styleClass="bg-primary text-white text-4xl shadow-2"
+                    [style]="{'width': '100px', 'height': '100px'}">
+                </p-avatar>
+                <div>
+                    <h1 class="m-0 text-900">{{ usuario?.nombre }}</h1>
+                    <p class="text-600 m-0 text-xl">{{ usuario?.email }}</p>
+                    <p-tag severity="success" value="Cuenta Verificada" styleClass="mt-2"></p-tag>
+                </div>
+            </div>
 
-    <ng-template pTemplate="content">
-      <p-divider></p-divider>
-      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-top: 1.5rem;">
+            <p-divider></p-divider>
 
-        <div style="display: flex; flex-direction: column;">
-          <span style="font-weight: bold; color: #64748b;">Usuario Activo</span>
-          <span style="font-size: 1.1rem; margin-top: 0.2rem; color: #1e293b;">{{ userData.nombre }}</span>
-        </div>
+            <div class="grid mt-4">
+                <div class="col-12 md:col-6 mb-3">
+                    <label class="block font-bold text-700 mb-2">Identificador Único (ID)</label>
+                    <div class="p-3 surface-100 border-round font-mono text-800">
+                        {{ usuario?.id }}
+                    </div>
+                </div>
+                <div class="col-12 md:col-6 mb-3">
+                    <label class="block font-bold text-700 mb-2">Estado de Sesión</label>
+                    <div class="p-3 surface-100 border-round text-primary font-bold">
+                        <i class="pi pi-shield mr-2"></i> JWT Activo
+                    </div>
+                </div>
+            </div>
 
-        <div style="display: flex; flex-direction: column;">
-          <span style="font-weight: bold; color: #64748b;">Email Institucional</span>
-          <span style="font-size: 1.1rem; margin-top: 0.2rem; color: #1e293b;">{{ userData.email }}</span>
-        </div>
+            <div class="mt-4">
+                <h3 class="text-900 border-bottom-1 surface-border pb-2">
+                    <i class="pi pi-key mr-2"></i> Permisos Técnicos Asignados
+                </h3>
+                <p class="text-600 mb-3">Estas acciones están autorizadas en su token de acceso actual:</p>
 
-        <div style="display: flex; flex-direction: column; grid-column: span 2;">
-          <span style="font-weight: bold; color: #64748b;">Tokens y Permisos Autorizados</span>
-          <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-top: 0.8rem;">
-            <span *ngFor="let perm of userData.permisos" style="background: #e2e8f0; padding: 0.4rem 0.8rem; border-radius: 4px; font-size: 0.85rem; color: #475569; border: 1px solid #cbd5e1;">
-              <i class="pi pi-check-circle" style="font-size: 0.8rem; margin-right: 4px; color: #10b981;"></i> {{ perm }}
-            </span>
-          </div>
-        </div>
+                <div class="flex flex-wrap gap-2">
+                    <ng-container *ngFor="let p of usuario?.permisos">
+                        <p-tag
+                            [value]="formatPerm(p)"
+                            [rounded]="true"
+                            severity="info"
+                            styleClass="px-3 py-2 shadow-1">
+                        </p-tag>
+                    </ng-container>
+                </div>
+            </div>
 
-      </div>
-    </ng-template>
+            <div class="mt-6 flex justify-content-between align-items-center">
+                <span class="text-600 text-sm">
+                    Los cambios de permisos requieren reiniciar sesión para actualizar el token.
+                </span>
+                <p-button
+                    label="Cerrar Sesión Segura"
+                    icon="pi pi-sign-out"
+                    severity="danger"
+                    [outlined]="true"
+                    (onClick)="logout()">
+                </p-button>
+            </div>
+        </p-card>
 
-    <ng-template pTemplate="footer">
-      <p-divider></p-divider>
-      <div style="display: flex; justify-content: flex-end; gap: 1rem; margin-top: 1rem;">
-        <p-button *appHasPermission="'user:edit:profile'" label="Guardar Cambios" icon="pi pi-save" severity="success" (click)="actualizarUsuario()"></p-button>
-        <p-button label="Cerrar Sesión Segura" icon="pi pi-sign-out" [outlined]="true" severity="danger" (click)="auth.logout()"></p-button>
-      </div>
-    </ng-template>
-  </p-card>
+    </div>
 </div>

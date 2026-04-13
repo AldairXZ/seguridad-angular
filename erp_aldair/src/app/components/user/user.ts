@@ -1,41 +1,43 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
 import { CardModule } from 'primeng/card';
-import { ButtonModule } from 'primeng/button';
 import { AvatarModule } from 'primeng/avatar';
+import { TagModule } from 'primeng/tag';
+import { ButtonModule } from 'primeng/button';
 import { DividerModule } from 'primeng/divider';
-import { ToastModule } from 'primeng/toast';
-import { MessageService } from 'primeng/api';
+import { TooltipModule } from 'primeng/tooltip';
 import { AuthService } from '../../services/auth';
-import { HasPermissionDirective } from '../../directives/has-permission.directive';
 
 @Component({
   selector: 'app-user',
   standalone: true,
   imports: [
-    CommonModule, RouterModule, CardModule, ButtonModule,
-    AvatarModule, DividerModule, ToastModule, HasPermissionDirective
+    CommonModule,
+    CardModule,
+    AvatarModule,
+    TagModule,
+    ButtonModule,
+    DividerModule,
+    TooltipModule
   ],
-  providers: [MessageService],
   templateUrl: './user.html'
 })
 export class UserComponent implements OnInit {
-  userData: any = {};
+  usuario: any = null;
 
-  constructor(private messageService: MessageService, public auth: AuthService) {}
+  constructor(private auth: AuthService) {}
 
   ngOnInit() {
-    if (this.auth.usuarioActual) {
-      this.userData = {
-        ...this.auth.usuarioActual,
-        telefono: 'N/A',
-        direccion: 'N/A'
-      };
-    }
+    // Obtenemos los datos directamente del servicio de autenticación
+    this.usuario = this.auth.usuarioActual;
   }
 
-  actualizarUsuario() {
-    this.messageService.add({ severity: 'success', summary: 'Actualizado', detail: 'Tus datos de perfil han sido guardados' });
+  logout() {
+    this.auth.logout();
+  }
+
+  // Función para dar formato visual a los strings de permisos
+  formatPerm(perm: string): string {
+    return perm.replace(':', ' ').toUpperCase();
   }
 }
