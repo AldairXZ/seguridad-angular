@@ -1,114 +1,191 @@
 <p-toast></p-toast>
-<div style="padding: 2rem;">
 
-  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
-    <h2 style="margin: 0;">Gestión de Tickets - {{ groupName }}</h2>
-
-    <div style="display: flex; gap: 1rem; align-items: center;">
-      <p-selectButton [options]="vistaOpciones" [(ngModel)]="vistaActual" optionValue="value">
-        <ng-template let-item pTemplate><i [class]="item.icon"></i></ng-template>
-      </p-selectButton>
-
-      <p-button *appHasPermission="'tickets:add'" label="Nuevo Ticket" icon="pi pi-plus" severity="success" (click)="abrirNuevoTicket()"></p-button>
-    </div>
-  </div>
-
-  <div *ngIf="vistaActual === 'kanban'" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem;">
-    <ng-container *ngFor="let estado of ['Pendiente', 'En progreso', 'Revisión', 'Finalizado']">
-      <div pDroppable="tickets" (onDrop)="drop($event, estado)" style="background: #f1f5f9; padding: 1rem; border-radius: 8px; min-height: 400px;">
-        <h4 style="margin-top: 0; padding-bottom: 0.5rem; border-bottom: 2px solid #cbd5e1;">{{ estado }}</h4>
-
-        <div *ngFor="let ticket of getTicketsByEstado(estado)" pDraggable="tickets" [pDraggableDisabled]="!puedeEditarEstadoYComentarios(ticket)" (onDragStart)="dragStart(ticket)" (onDragEnd)="dragEnd()" style="margin-bottom: 1rem;">
-          <p-card [header]="ticket.titulo" [subheader]="ticket.asignadoA" styleClass="p-card-shadow" (click)="verDetalleTicket(ticket)" [style]="{'cursor': puedeEditarEstadoYComentarios(ticket) ? 'grab' : 'not-allowed'}">
-            <p-tag [value]="ticket.prioridad" severity="warning" styleClass="mb-2"></p-tag>
-            <p style="font-size: 0.85rem; color: #64748b; margin-top: 0.5rem;">FL: {{ ticket.fechaLimite }}</p>
-          </p-card>
+<div class="p-4">
+    <div class="flex flex-column md:flex-row justify-content-between align-items-center mb-5 gap-3 bg-white p-4 border-round-xl shadow-1">
+        <div>
+            <h2 class="m-0 text-900 font-bold text-2xl">Gestión de Tickets</h2>
+            <span class="text-500 text-sm font-medium"><i class="pi pi-folder-open mr-2"></i>{{ groupName }}</span>
         </div>
 
-      </div>
-    </ng-container>
-  </div>
+        <div class="flex gap-3 align-items-center">
+            <p-selectButton [options]="vistaOpciones" [(ngModel)]="vistaActual" optionValue="value" styleClass="shadow-1 border-round">
+                <ng-template let-item pTemplate>
+                    <i [class]="item.icon" class="text-xl"></i>
+                </ng-template>
+            </p-selectButton>
 
-  <div *ngIf="vistaActual === 'lista'">
-    <p-table [value]="tickets" [paginator]="true" [rows]="10" [globalFilterFields]="['titulo', 'asignadoA', 'estadoActual', 'prioridad']" styleClass="p-datatable-striped p-datatable-gridlines">
-      <ng-template pTemplate="header">
-        <tr>
-          <th pSortableColumn="id" style="width: 10%">ID <p-sortIcon field="id"></p-sortIcon></th>
-          <th pSortableColumn="titulo" style="width: 25%">Título <p-sortIcon field="titulo"></p-sortIcon>
-            <p-columnFilter type="text" field="titulo" display="menu"></p-columnFilter>
-          </th>
-          <th pSortableColumn="estadoActual" style="width: 15%">Estado <p-sortIcon field="estadoActual"></p-sortIcon>
-            <p-columnFilter type="text" field="estadoActual" display="menu"></p-columnFilter>
-          </th>
-          <th pSortableColumn="prioridad" style="width: 15%">Prioridad <p-sortIcon field="prioridad"></p-sortIcon>
-            <p-columnFilter type="text" field="prioridad" display="menu"></p-columnFilter>
-          </th>
-          <th pSortableColumn="asignadoA" style="width: 20%">Asignado A <p-sortIcon field="asignadoA"></p-sortIcon>
-            <p-columnFilter type="text" field="asignadoA" display="menu"></p-columnFilter>
-          </th>
-          <th pSortableColumn="fechaCreacion" style="width: 10%">Fecha <p-sortIcon field="fechaCreacion"></p-sortIcon></th>
-          <th style="width: 5%">Ver</th>
-        </tr>
-      </ng-template>
-      <ng-template pTemplate="body" let-ticket>
-        <tr>
-          <td>{{ ticket.id }}</td>
-          <td><strong>{{ ticket.titulo }}</strong></td>
-          <td><p-tag [value]="ticket.estadoActual" [severity]="getSeverity(ticket.estadoActual)"></p-tag></td>
-          <td>{{ ticket.prioridad }}</td>
-          <td>{{ ticket.asignadoA }}</td>
-          <td>{{ ticket.fechaCreacion }}</td>
-          <td style="text-align: center;">
-            <p-button icon="pi pi-eye" [rounded]="true" [text]="true" (click)="verDetalleTicket(ticket)"></p-button>
-          </td>
-        </tr>
-      </ng-template>
-    </p-table>
-  </div>
+            <p-button *appHasPermission="'tickets:add'" label="Nuevo Ticket" icon="pi pi-plus" styleClass="p-button-success shadow-1" (onClick)="abrirNuevoTicket()"></p-button>
+        </div>
+    </div>
 
+    <div *ngIf="vistaActual === 'kanban'" class="flex overflow-x-auto pb-4 gap-4" style="min-height: 65vh;">
+
+        <ng-container *ngFor="let estado of ['Pendiente', 'En progreso', 'Revisión', 'Finalizado']">
+            <div pDroppable="tickets" (onDrop)="drop($event, estado)" class="flex-none w-20rem bg-gray-100 border-round-xl p-3 shadow-1">
+
+                <div class="flex justify-content-between align-items-center mb-3 border-bottom-2 border-300 pb-2">
+                    <h4 class="m-0 text-700 font-bold text-lg">{{ estado }}</h4>
+                    <p-tag [value]="getTicketsByEstado(estado).length.toString()" severity="secondary" [rounded]="true"></p-tag>
+                </div>
+
+                <div class="flex flex-column gap-3 min-h-full">
+                    <div *ngFor="let ticket of getTicketsByEstado(estado)"
+                         pDraggable="tickets"
+                         [pDraggableDisabled]="!puedeEditarEstadoYComentarios(ticket)"
+                         (onDragStart)="dragStart(ticket)"
+                         (onDragEnd)="dragEnd()"
+                         class="surface-card p-3 border-round-lg shadow-1 transition-duration-200 border-left-3"
+                         [ngClass]="{
+                            'hover:shadow-3 cursor-grab': puedeEditarEstadoYComentarios(ticket),
+                            'cursor-not-allowed opacity-70': !puedeEditarEstadoYComentarios(ticket),
+                            'border-red-500': ticket.prioridad === 'Urgente',
+                            'border-orange-500': ticket.prioridad === 'Alta',
+                            'border-blue-500': ticket.prioridad === 'Media',
+                            'border-green-500': ticket.prioridad === 'Baja'
+                         }">
+
+                        <div class="flex justify-content-between align-items-start mb-2">
+                            <span class="text-sm font-bold text-500">#{{ticket.id}}</span>
+                            <p-button icon="pi pi-expand" styleClass="p-button-rounded p-button-text p-button-sm p-0 w-2rem h-2rem text-600" (onClick)="verDetalleTicket(ticket)"></p-button>
+                        </div>
+
+                        <div class="text-900 font-bold mb-3 line-height-3 text-lg">{{ticket.titulo}}</div>
+
+                        <div class="flex justify-content-between align-items-end mt-3 border-top-1 surface-border pt-3">
+                            <div class="flex flex-column gap-1">
+                                <p-tag [value]="ticket.prioridad" [severity]="ticket.prioridad === 'Urgente' ? 'danger' : (ticket.prioridad === 'Alta' ? 'warning' : 'info')"></p-tag>
+                                <span class="text-xs text-500 font-medium"><i class="pi pi-calendar mr-1"></i>{{ ticket.fechaLimite }}</span>
+                            </div>
+                            <div class="w-2rem h-2rem bg-primary border-circle flex align-items-center justify-content-center text-xs font-bold shadow-1" pTooltip="Asignado a: {{ticket.asignadoA}}" tooltipPosition="top">
+                                {{ ticket.asignadoA.substring(0,2).toUpperCase() }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div *ngIf="getTicketsByEstado(estado).length === 0" class="border-2 border-dashed border-400 border-round-lg p-4 text-center text-500 font-medium">
+                        Soltar tickets aquí
+                    </div>
+                </div>
+
+            </div>
+        </ng-container>
+    </div>
+
+    <div *ngIf="vistaActual === 'lista'" class="surface-card shadow-1 border-round-xl p-3">
+        <p-table
+            [value]="tickets"
+            [paginator]="true"
+            [rows]="10"
+            [showCurrentPageReport]="true"
+            [rowsPerPageOptions]="[5, 10, 20]"
+            currentPageReportTemplate="Mostrando {first} a {last} de {totalRecords} tickets"
+            styleClass="p-datatable-striped p-datatable-sm"
+            [tableStyle]="{'min-width': '50rem'}">
+
+            <ng-template pTemplate="header">
+                <tr>
+                    <th pSortableColumn="id" style="width:10%">ID <p-sortIcon field="id"></p-sortIcon></th>
+                    <th pSortableColumn="titulo" style="width:30%">Título <p-sortIcon field="titulo"></p-sortIcon></th>
+                    <th pSortableColumn="estadoActual" style="width:15%">Estado <p-sortIcon field="estadoActual"></p-sortIcon></th>
+                    <th pSortableColumn="prioridad" style="width:15%">Prioridad <p-sortIcon field="prioridad"></p-sortIcon></th>
+                    <th pSortableColumn="asignadoA" style="width:20%">Asignado <p-sortIcon field="asignadoA"></p-sortIcon></th>
+                    <th style="width:10%" class="text-center">Acciones</th>
+                </tr>
+                <tr>
+                    <th><p-columnFilter type="text" field="id" matchMode="contains"></p-columnFilter></th>
+                    <th><p-columnFilter type="text" field="titulo" matchMode="contains"></p-columnFilter></th>
+                    <th><p-columnFilter type="text" field="estadoActual" matchMode="equals"></p-columnFilter></th>
+                    <th><p-columnFilter type="text" field="prioridad" matchMode="equals"></p-columnFilter></th>
+                    <th><p-columnFilter type="text" field="asignadoA" matchMode="contains"></p-columnFilter></th>
+                    <th></th>
+                </tr>
+            </ng-template>
+            <ng-template pTemplate="body" let-ticket>
+                <tr>
+                    <td class="font-bold text-500">#{{ ticket.id }}</td>
+                    <td class="font-medium">{{ ticket.titulo }}</td>
+                    <td><p-tag [value]="ticket.estadoActual" [severity]="getSeverity(ticket.estadoActual)"></p-tag></td>
+                    <td><p-tag [value]="ticket.prioridad" [severity]="ticket.prioridad === 'Urgente' ? 'danger' : (ticket.prioridad === 'Alta' ? 'warning' : 'info')"></p-tag></td>
+                    <td>
+                        <div class="flex align-items-center gap-2">
+                            <i class="pi pi-user text-primary"></i>
+                            <span>{{ ticket.asignadoA }}</span>
+                        </div>
+                    </td>
+                    <td class="text-center">
+                        <p-button icon="pi pi-external-link" styleClass="p-button-rounded p-button-text p-button-secondary" (onClick)="verDetalleTicket(ticket)" pTooltip="Ver Detalle" tooltipPosition="left"></p-button>
+                    </td>
+                </tr>
+            </ng-template>
+            <ng-template pTemplate="emptymessage">
+                <tr>
+                    <td colspan="6" class="text-center p-4 text-500 font-medium">No se encontraron tickets en este workspace.</td>
+                </tr>
+            </ng-template>
+        </p-table>
+    </div>
 </div>
 
-<p-dialog [(visible)]="displayTicketDialog" [style]="{width: '600px'}" header="Detalle de Ticket" [modal]="true" styleClass="p-fluid">
-  <ng-template pTemplate="content">
-    <div class="field mb-3">
-      <label style="font-weight: bold;">Título</label>
-      <input pInputText [(ngModel)]="ticketActual.titulo" [disabled]="!puedeEditarCamposBase(ticketActual)" />
+<p-dialog [(visible)]="displayTicketDialog" [style]="{width: '650px'}" [modal]="true" styleClass="p-fluid border-round-xl">
+    <ng-template pTemplate="header">
+        <div class="flex align-items-center gap-2">
+            <i class="pi pi-ticket text-2xl text-primary"></i>
+            <span class="font-bold text-xl">{{ ticketActual.id ? 'Detalle de Ticket #' + ticketActual.id : 'Crear Nuevo Ticket' }}</span>
+        </div>
+    </ng-template>
+
+    <div class="formgrid grid mt-3">
+        <div class="field col-12">
+            <label class="font-bold text-700">Título de la Incidencia</label>
+            <input pInputText [(ngModel)]="ticketActual.titulo" [disabled]="!puedeEditarCamposBase(ticketActual)" class="p-inputtext-lg" placeholder="Ej. Error en base de datos" />
+        </div>
+
+        <div class="field col-12">
+            <label class="font-bold text-700">Descripción detallada</label>
+            <textarea pInputTextarea rows="4" [(ngModel)]="ticketActual.descripcion" [disabled]="!puedeEditarCamposBase(ticketActual)" placeholder="Explica el problema a resolver..."></textarea>
+        </div>
+
+        <div class="field col-12 md:col-6">
+            <label class="font-bold text-700">Estado Actual</label>
+            <p-dropdown [options]="estados" [(ngModel)]="ticketActual.estadoActual" appendTo="body" [disabled]="!puedeEditarEstadoYComentarios(ticketActual)"></p-dropdown>
+        </div>
+
+        <div class="field col-12 md:col-6">
+            <label class="font-bold text-700">Prioridad</label>
+            <p-dropdown [options]="prioridades" [(ngModel)]="ticketActual.prioridad" appendTo="body" [disabled]="!puedeEditarCamposBase(ticketActual)"></p-dropdown>
+        </div>
+
+        <div class="field col-12 md:col-6">
+            <label class="font-bold text-700">Asignado a (Correo)</label>
+            <div class="p-inputgroup">
+                <span class="p-inputgroup-addon"><i class="pi pi-user"></i></span>
+                <input pInputText [(ngModel)]="ticketActual.asignadoA" [disabled]="!puedeEditarCamposBase(ticketActual)" placeholder="usuario@marher.com" />
+            </div>
+        </div>
+
+        <div class="field col-12 md:col-6">
+            <label class="font-bold text-700">Fecha Límite</label>
+            <input pInputText type="date" [(ngModel)]="ticketActual.fechaLimite" [disabled]="!puedeEditarCamposBase(ticketActual)" />
+        </div>
+
+        <div class="field col-12">
+            <label class="font-bold text-700">Comentarios (Avances)</label>
+            <div class="p-inputgroup">
+                <span class="p-inputgroup-addon"><i class="pi pi-comment"></i></span>
+                <input pInputText [(ngModel)]="ticketActual.comentarios" [disabled]="!puedeEditarEstadoYComentarios(ticketActual)" placeholder="Añade una nota rápida..." />
+            </div>
+        </div>
+
+        <div class="field col-12" *ngIf="ticketActual.id">
+            <label class="font-bold text-700"><i class="pi pi-history mr-2"></i>Historial de Cambios</label>
+            <textarea pInputTextarea rows="3" [(ngModel)]="ticketActual.historialCambios" disabled class="surface-200 text-600 font-italic text-sm"></textarea>
+        </div>
     </div>
-    <div class="field mb-3">
-      <label style="font-weight: bold;">Descripción</label>
-      <textarea pInputText rows="3" [(ngModel)]="ticketActual.descripcion" style="width: 100%; resize: none;" [disabled]="!puedeEditarCamposBase(ticketActual)"></textarea>
-    </div>
-    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
-      <div class="field">
-        <label style="font-weight: bold;">Estado Actual</label>
-        <p-dropdown [options]="estados" [(ngModel)]="ticketActual.estadoActual" appendTo="body" [disabled]="!puedeEditarEstadoYComentarios(ticketActual)"></p-dropdown>
-      </div>
-      <div class="field">
-        <label style="font-weight: bold;">Prioridad</label>
-        <p-dropdown [options]="prioridades" [(ngModel)]="ticketActual.prioridad" appendTo="body" [disabled]="!puedeEditarCamposBase(ticketActual)"></p-dropdown>
-      </div>
-    </div>
-    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
-      <div class="field">
-        <label style="font-weight: bold;">Asignado a:</label>
-        <input pInputText [(ngModel)]="ticketActual.asignadoA" [disabled]="!puedeEditarCamposBase(ticketActual)" />
-      </div>
-      <div class="field">
-        <label style="font-weight: bold;">Fecha Límite</label>
-        <input pInputText type="date" [(ngModel)]="ticketActual.fechaLimite" [disabled]="!puedeEditarCamposBase(ticketActual)" />
-      </div>
-    </div>
-    <div class="field mb-3">
-      <label style="font-weight: bold;">Comentarios</label>
-      <input pInputText [(ngModel)]="ticketActual.comentarios" [disabled]="!puedeEditarEstadoYComentarios(ticketActual)" />
-    </div>
-    <div class="field">
-      <label style="font-weight: bold;">Historial de Cambios</label>
-      <textarea pInputText rows="4" [(ngModel)]="ticketActual.historialCambios" style="width: 100%; resize: none;" disabled></textarea>
-    </div>
-  </ng-template>
-  <ng-template pTemplate="footer">
-    <p-button label="Cerrar" icon="pi pi-times" [text]="true" (click)="displayTicketDialog = false"></p-button>
-    <p-button *ngIf="puedeEditarEstadoYComentarios(ticketActual)" label="Guardar Cambios" icon="pi pi-check" (click)="guardarTicket()"></p-button>
-  </ng-template>
+
+    <ng-template pTemplate="footer">
+        <div class="flex justify-content-end gap-2 border-top-1 surface-border pt-3">
+            <p-button label="Cancelar" icon="pi pi-times" styleClass="p-button-text p-button-secondary font-bold" (onClick)="displayTicketDialog = false"></p-button>
+            <p-button *ngIf="puedeEditarEstadoYComentarios(ticketActual)" label="Guardar Cambios" icon="pi pi-save" styleClass="p-button-primary shadow-1" (onClick)="guardarTicket()"></p-button>
+        </div>
+    </ng-template>
 </p-dialog>

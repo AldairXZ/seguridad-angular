@@ -1,77 +1,113 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { TableModule } from 'primeng/table';
 import { ButtonModule } from 'primeng/button';
-import { InputTextModule } from 'primeng/inputtext';
 import { DialogModule } from 'primeng/dialog';
+import { InputTextModule } from 'primeng/inputtext';
 import { CheckboxModule } from 'primeng/checkbox';
+import { DropdownModule } from 'primeng/dropdown';
 import { ToastModule } from 'primeng/toast';
-import { TagModule } from 'primeng/tag';
 import { MessageService } from 'primeng/api';
 import { AuthService } from '../../services/auth';
-import { HasPermissionDirective } from '../../directives/has-permission.directive';
 
 @Component({
   selector: 'app-gestion-usuarios',
   standalone: true,
-  imports: [
-    CommonModule, FormsModule, TableModule, ButtonModule,
-    InputTextModule, DialogModule, CheckboxModule,
-    ToastModule, TagModule, HasPermissionDirective
-  ],
+  imports: [CommonModule, FormsModule, TableModule, ButtonModule, DialogModule, InputTextModule, CheckboxModule, DropdownModule, ToastModule],
   providers: [MessageService],
   templateUrl: './gestion-usuarios.html'
 })
 export class GestionUsuariosComponent implements OnInit {
   usuarios: any[] = [];
-  permisosDisponibles: string[] = [
-    'group:view', 'group:add', 'group:edit', 'group:delete', 'group:manage',
-    'ticket:view', 'ticket:add', 'ticket:edit', 'ticket:delete', 'ticket:edit:state', 'ticket:edit:comment', 'ticket:manage',
-    'user:view', 'user:add', 'user:edit', 'user:edit:profile', 'user:delete', 'users:manage'
-  ];
-  usuarioDialog: boolean = false;
-  usuarioActual: any = {};
+  grupos: any[] = [];
 
-  constructor(private messageService: MessageService, public auth: AuthService) {}
+  displayEditDialog: boolean = false;
+  displayPermsDialog: boolean = false;
+
+  usuarioSeleccionado: any = {};
+  grupoParaPermisos: any = null;
+
+  permisosDisponibles = [
+    { label: 'Ver Tickets', value: 'tickets:view' },
+    { label: 'Agregar Tickets', value: 'tickets:add' },
+    { label: 'Mover Tickets', value: 'tickets:move' },
+    { label: 'Administrar Tickets', value: 'tickets:manage' },
+    { label: 'Ver Grupos', value: 'group:view' },
+    { label: 'Administrar Grupos', value: 'groups:manage' },
+    { label: 'Administrar Usuarios', value: 'users:manage' }
+  ];
+
+  permisosSeleccionados: string[] = [];
+
+  constructor(private http: HttpClient, private messageService: MessageService, private auth: AuthService) {}
 
   ngOnInit() {
-    this.usuarios = [
-      { id: 1, nombre: 'Admin Master', email: 'admin@marher.com', permisos: this.permisosDisponibles },
-      { id: 2, nombre: 'Project Manager', email: 'pm@marher.com', permisos: ['group:view', 'group:manage', 'ticket:view', 'ticket:add', 'ticket:manage'] },
-      { id: 3, nombre: 'Desarrollador', email: 'dev@marher.com', permisos: ['ticket:view', 'ticket:edit', 'ticket:edit:state'] }
-    ];
+    this.cargarUsuarios();
+    this.cargarGrupos();
   }
 
-  abrirNuevo() {
-    this.usuarioActual = { id: null, nombre: '', email: '', permisos: [], password: '' };
-    this.usuarioDialog = true;
+  private getHeaders() {
+    const token = document.cookie.split('; ').find(row => row.startsWith('erp_token='))?.split('=')[1];
+    return new HttpHeaders().set('Authorization', `Bearer ${token}`);
   }
 
-  editarUsuario(user: any) {
-    this.usuarioActual = JSON.parse(JSON.stringify(user));
-    if (!this.usuarioActual.permisos) {
-      this.usuarioActual.permisos = [];
+  cargarUsuarios() {
+    this.http.get<any>('http://localhost:3000/api/users', { headers: this.getHeaders() }).subscribe({
+      next: (res) => this.usuarios = res.data,
+      error: () => this.messageService.add({ severity: 'error', summary: 'Error', detail: 'No se pudieron cargar usuarios' })
+    });
+  }
+
+  cargarGrupos() {
+    this.http.get<any>('http://localhost:3000/api/groups', { headers: this.getHeaders() }).subscribe({
+      next: (res) => this.grupos = res.data
+    });
+  }
+
+  abrirEdicion(usuario: any) {
+    this.usuarioSeleccionado = { ...usuario };
+    this.displayEditDialog = true;
+  }
+
+  abrirPermisos(usuario: any) {
+    this.usuarioSeleccionado = { ...usuario };
+    this.grupoParaPermisos = null;
+    this.permisosSeleccionados = [];
+    this.displayPermsDialog = true;
+  }
+
+  onGrupoChange() {
+    if (this.grupoParaPermisos && this.usuarioSeleccionado.permisos) {
+      this.permisosSeleccionados = this.usuarioSeleccionado.permisos[this.grupoParaPermisos.id] || [];
     }
-    this.usuarioDialog = true;
-  }
-
-  eliminarUsuario(user: any) {
-    this.usuarios = this.usuarios.filter(u => u.id !== user.id);
-    this.messageService.add({ severity: 'success', summary: 'Eliminado', detail: 'El usuario ha sido borrado del sistema' });
   }
 
   guardarUsuario() {
-    if (this.usuarioActual.nombre && this.usuarioActual.email) {
-      if (this.usuarioActual.id) {
-        const index = this.usuarios.findIndex(u => u.id === this.usuarioActual.id);
-        this.usuarios[index] = JSON.parse(JSON.stringify(this.usuarioActual));
-      } else {
-        this.usuarioActual.id = Date.now();
-        this.usuarios.push(JSON.parse(JSON.stringify(this.usuarioActual)));
+    this.http.put<any>(`http://localhost:3000/api/users/${this.usuarioSeleccionado.id}`, this.usuarioSeleccionado, { headers: this.getHeaders() }).subscribe({
+      next: () => {
+        this.cargarUsuarios();
+        this.displayEditDialog = false;
+        this.messageService.add({ severity: 'success', summary: 'Éxito', detail: 'Usuario actualizado' });
       }
-      this.usuarioDialog = false;
-      this.messageService.add({ severity: 'success', summary: 'Guardado', detail: 'Configuración de usuario actualizada' });
-    }
+    });
+  }
+
+  guardarPermisos() {
+    if (!this.grupoParaPermisos) return;
+
+    const payload = {
+      groupId: this.grupoParaPermisos.id.toString(),
+      permisos: this.permisosSeleccionados
+    };
+
+    this.http.put<any>(`http://localhost:3000/api/users/${this.usuarioSeleccionado.id}/permissions`, payload, { headers: this.getHeaders() }).subscribe({
+      next: () => {
+        this.cargarUsuarios();
+        this.displayPermsDialog = false;
+        this.messageService.add({ severity: 'success', summary: 'Éxito', detail: 'Permisos actualizados' });
+      }
+    });
   }
 }

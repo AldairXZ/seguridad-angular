@@ -1,19 +1,18 @@
 const fastify = require('fastify')({ logger: false });
 const axios = require('axios');
 const jwt = require('jsonwebtoken');
-const sqlite3 = require('sqlite3').verbose();
+const { Pool } = require('pg');
 
-const db = new sqlite3.Database('./erp_auditoria.db');
-
-db.serialize(() => {
-  db.run("CREATE TABLE IF NOT EXISTS logs (id INTEGER PRIMARY KEY AUTOINCREMENT, endpoint TEXT, method TEXT, user TEXT, ip TEXT, status INTEGER, error_stack TEXT, timestamp DATETIME DEFAULT CURRENT_TIMESTAMP)");
-  db.run("CREATE TABLE IF NOT EXISTS metrics (endpoint TEXT PRIMARY KEY, request_count INTEGER, avg_time REAL)");
+const NEON_URL = "postgresql://neondb_owner:npg_7Xt5WvJYkEKP@ep-broad-pond-amc5lzhv-pooler.c-5.us-east-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require";
+const pool = new Pool({
+  connectionString: NEON_URL,
+  ssl: { rejectUnauthorized: false }
 });
 
 fastify.register(require('@fastify/cors'), { 
   origin: true,
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'x-user-data']
+  allowedHeaders: ['Content-Type', 'Authorization', 'x-user-data', 'x-group-id']
 });
 
 fastify.register(require('@fastify/rate-limit'), {
@@ -71,9 +70,15 @@ fastify.addHook('preHandler', async (request, reply) => {
 
       if (routeInfo[1].perm) {
         const requiredPerm = routeInfo[1].perm[request.method];
-        if (requiredPerm && !decoded.permisos.includes(requiredPerm)) {
-          reply.code(403).send({ statusCode: 403, intOpCode: "ERR403", data: [{ message: "Forbidden" }] });
-          return reply;
+        if (requiredPerm) {
+          const groupId = request.headers['x-group-id'];
+          const hasGlobal = decoded.permisos['global'] && decoded.permisos['global'].includes(requiredPerm);
+          const hasGroup = groupId && decoded.permisos[groupId] && decoded.permisos[groupId].includes(requiredPerm);
+
+          if (!hasGlobal && !hasGroup) {
+            reply.code(403).send({ statusCode: 403, intOpCode: "ERR403", data: [{ message: "Forbidden" }] });
+            return reply;
+          }
         }
       }
     } catch (err) {
@@ -88,8 +93,8 @@ fastify.addHook('onError', (request, reply, error, done) => {
   done();
 });
 
-fastify.addHook('onResponse', (request, reply, done) => {
-  if (request.method === 'OPTIONS') return done();
+fastify.addHook('onResponse', async (request, reply) => {
+  if (request.method === 'OPTIONS') return;
 
   const endpoint = request.url.split('?')[0];
   const method = request.method;
@@ -99,21 +104,25 @@ fastify.addHook('onResponse', (request, reply, done) => {
   const errorStack = request.raw.error_stack || null;
   const responseTime = reply.getResponseTime();
 
-  db.run(`INSERT INTO logs (endpoint, method, user, ip, status, error_stack) VALUES (?, ?, ?, ?, ?, ?)`,
-    [endpoint, method, user, ip, status, errorStack]
-  );
+  try {
+    await pool.query(
+      `INSERT INTO logs (endpoint, method, "user", ip, status, error_stack) VALUES ($1, $2, $3, $4, $5, $6)`,
+      [endpoint, method, user, ip, status, errorStack]
+    );
 
-  db.get(`SELECT request_count, avg_time FROM metrics WHERE endpoint = ?`, [endpoint], (err, row) => {
-    if (!row) {
-      db.run(`INSERT INTO metrics (endpoint, request_count, avg_time) VALUES (?, 1, ?)`, [endpoint, responseTime]);
+    const metricsRes = await pool.query(`SELECT request_count, avg_time FROM metrics WHERE endpoint = $1`, [endpoint]);
+    
+    if (metricsRes.rows.length === 0) {
+      await pool.query(`INSERT INTO metrics (endpoint, request_count, avg_time) VALUES ($1, 1, $2)`, [endpoint, responseTime]);
     } else {
+      const row = metricsRes.rows[0];
       const newCount = row.request_count + 1;
       const newAvg = ((row.avg_time * row.request_count) + responseTime) / newCount;
-      db.run(`UPDATE metrics SET request_count = ?, avg_time = ? WHERE endpoint = ?`, [newCount, newAvg, endpoint]);
+      await pool.query(`UPDATE metrics SET request_count = $1, avg_time = $2 WHERE endpoint = $3`, [newCount, newAvg, endpoint]);
     }
-  });
-
-  done();
+  } catch (dbError) {
+    // Si falla el loggeo, no queremos tumbar la petición principal
+  }
 });
 
 fastify.route({
@@ -143,6 +152,14 @@ fastify.route({
       return reply.code(status).send(data);
     }
   }
+});
+
+fastify.get('/api/health', async (request, reply) => {
+  return reply.code(200).send({ 
+    statusCode: 200, 
+    intOpCode: "SxOK200", 
+    data: [{ status: "Up", message: "El API Gateway está funcionando correctamente" }] 
+  });
 });
 
 fastify.listen({ port: 3000, host: '0.0.0.0' });

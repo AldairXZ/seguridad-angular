@@ -11,6 +11,7 @@ export class AuthService {
   private apiUrl = 'http://localhost:3000';
 
   usuarioActual: any = null;
+  permisosGrupoActual: string[] = [];
 
   constructor(private http: HttpClient, private router: Router) {
     this.cargarDatosGuardados();
@@ -41,6 +42,10 @@ export class AuthService {
     const sesionGuardada = this.getCookie('erp_sesion_actual');
     if (sesionGuardada) {
       this.usuarioActual = JSON.parse(sesionGuardada);
+      const groupId = localStorage.getItem('erp_current_group');
+      if (groupId) {
+        this.setPermisosGrupo(groupId);
+      }
     }
   }
 
@@ -66,12 +71,24 @@ export class AuthService {
 
   logout() {
     this.usuarioActual = null;
+    this.permisosGrupoActual = [];
     this.deleteCookie('erp_sesion_actual');
     this.deleteCookie('erp_token');
     this.router.navigate(['/login']);
   }
 
+  setPermisosGrupo(groupId: string) {
+    if (this.usuarioActual && this.usuarioActual.permisos) {
+      this.permisosGrupoActual = this.usuarioActual.permisos[groupId] || [];
+    } else {
+      this.permisosGrupoActual = [];
+    }
+  }
+
   hasPermission(permission: string): boolean {
-    return this.usuarioActual ? this.usuarioActual.permisos.includes(permission) : false;
+    if (!this.usuarioActual || !this.usuarioActual.permisos) return false;
+    const permisosGlobales = this.usuarioActual.permisos['global'] || [];
+    if (permisosGlobales.includes(permission)) return true;
+    return this.permisosGrupoActual.includes(permission);
   }
 }

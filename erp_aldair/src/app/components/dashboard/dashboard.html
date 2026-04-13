@@ -1,59 +1,40 @@
-<div style="background-color: #F54927; min-height: calc(100vh - 80px); padding: 2rem;">
-  <div style="max-width: 1200px; margin: 0 auto;">
+<div class="flex justify-content-between align-items-center mb-4">
+    <h1 class="text-3xl font-bold text-900 m-0">Dashboard</h1>
+    <p-dropdown [options]="grupos" [(ngModel)]="grupoSeleccionado" optionLabel="nombre"
+        (onChange)="onGrupoChange($event)" placeholder="Seleccionar Grupo"
+        styleClass="w-15rem border-round-3xl border-none shadow-1">
+    </p-dropdown>
+</div>
 
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; background: white; padding: 1.5rem; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
-      <h2 style="color: #334155; margin: 0;">Dashboard de Control</h2>
-
-      <div style="display: flex; align-items: center; gap: 1rem;">
-        <span style="font-weight: bold; color: #64748b;">Contexto Global:</span>
-        <p-dropdown [options]="grupos" [(ngModel)]="grupoSeleccionado" optionLabel="nombre" placeholder="Cargando grupos..." (onChange)="onGrupoChange($event)" styleClass="w-15rem" [showClear]="false"></p-dropdown>
-      </div>
-    </div>
-
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
-
-      <p-card header="Resumen de Tickets" styleClass="p-card-shadow" [style]="{height: '100%'}">
-        <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 1rem 0;">
-          <span style="font-size: 1.2rem; color: #64748b; margin-bottom: 0.5rem;">Volumen Total del Contexto</span>
-          <span style="font-size: 4rem; font-weight: bold; color: #1e293b; line-height: 1; margin-bottom: 1rem;">
-            {{ totalTickets }}
-          </span>
-          <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; justify-content: center;">
-            <p-tag *ngFor="let stat of estadisticas" [value]="stat.cantidad + ' ' + stat.estado" [severity]="stat.color"></p-tag>
-          </div>
+<div class="grid mb-5">
+    <div class="col-12 md:col-6 lg:col-3" *ngFor="let stat of estadisticas">
+        <div class="surface-card shadow-1 p-4 border-round-xl h-full border-top-3"
+             [ngClass]="{'border-red-500': stat.color === 'danger', 'border-blue-500': stat.color === 'info', 'border-orange-500': stat.color === 'warning', 'border-green-500': stat.color === 'success'}">
+            <div class="flex justify-content-between mb-3">
+                <div>
+                    <span class="block text-500 font-medium mb-3">{{stat.estado}}</span>
+                    <div class="text-900 font-bold text-4xl">{{stat.cantidad}}</div>
+                </div>
+                <div class="flex align-items-center justify-content-center border-round w-3rem h-3rem"
+                     [ngClass]="{'bg-red-100 text-red-500': stat.color === 'danger', 'bg-blue-100 text-blue-500': stat.color === 'info', 'bg-orange-100 text-orange-500': stat.color === 'warning', 'bg-green-100 text-green-500': stat.color === 'success'}">
+                    <i class="pi pi-ticket text-xl"></i>
+                </div>
+            </div>
         </div>
-      </p-card>
-
-      <p-card header="Distribución de Estados" styleClass="p-card-shadow" [style]="{height: '100%'}">
-        <div style="height: 250px; position: relative; width: 100%; display: flex; justify-content: center;">
-          <p-chart type="doughnut" [data]="pieData" [options]="pieOptions" width="250px" height="250px"></p-chart>
-        </div>
-      </p-card>
-
-      <p-card header="Métricas de Carga" styleClass="p-card-shadow" [style]="{height: '100%'}">
-        <div style="height: 250px; position: relative; width: 100%;">
-          <p-chart type="bar" [data]="barData" [options]="barOptions" height="250px"></p-chart>
-        </div>
-      </p-card>
-
     </div>
+</div>
 
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem;">
-
-      <p-card subheader="Gestión de Perfil" styleClass="p-card-shadow">
-        <p style="color: #64748b;">Visualiza y administra los datos del usuario actual y los permisos heredados del JWT.</p>
-        <ng-template pTemplate="footer">
-          <p-button label="Ver Perfil" icon="pi pi-user" routerLink="/user" styleClass="w-full" [outlined]="true"></p-button>
-        </ng-template>
-      </p-card>
-
-      <p-card subheader="Tableros Operativos" styleClass="p-card-shadow">
-        <p style="color: #64748b;">Accede directamente al tablero Kanban del contexto que seleccionaste arriba.</p>
-        <ng-template pTemplate="footer">
-          <p-button label="Ir al Tablero (Kanban)" icon="pi pi-th-large" severity="success" routerLink="/vista-grupo" styleClass="w-full"></p-button>
-        </ng-template>
-      </p-card>
-
+<div class="grid">
+    <div class="col-12 lg:col-6">
+        <div class="surface-card shadow-1 border-round-xl p-4 h-full">
+            <h3 class="text-700 font-medium mb-4 mt-0">Distribución por Estado</h3>
+            <p-chart type="pie" [data]="pieData" [options]="pieOptions" height="300px"></p-chart>
+        </div>
     </div>
-  </div>
+    <div class="col-12 lg:col-6">
+        <div class="surface-card shadow-1 border-round-xl p-4 h-full">
+            <h3 class="text-700 font-medium mb-4 mt-0">Volumen General</h3>
+            <p-chart type="bar" [data]="barData" [options]="barOptions" height="300px"></p-chart>
+        </div>
+    </div>
 </div>

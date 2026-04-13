@@ -2,36 +2,34 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { Router } from '@angular/router'; // <-- NUEVO IMPORT
 import { TableModule } from 'primeng/table';
 import { ButtonModule } from 'primeng/button';
-import { InputTextModule } from 'primeng/inputtext';
 import { DialogModule } from 'primeng/dialog';
+import { InputTextModule } from 'primeng/inputtext';
 import { ToastModule } from 'primeng/toast';
+import { TooltipModule } from 'primeng/tooltip'; // <-- NUEVO IMPORT
 import { MessageService } from 'primeng/api';
-import { RouterModule } from '@angular/router';
-import { TagModule } from 'primeng/tag';
 import { AuthService } from '../../services/auth';
-import { HasPermissionDirective } from '../../directives/has-permission.directive';
 
 @Component({
   selector: 'app-group',
   standalone: true,
-  imports: [
-    CommonModule, FormsModule, TableModule, ButtonModule,
-    InputTextModule, DialogModule, ToastModule, RouterModule,
-    TagModule, HasPermissionDirective
-  ],
+  imports: [CommonModule, FormsModule, TableModule, ButtonModule, DialogModule, InputTextModule, ToastModule, TooltipModule],
   providers: [MessageService],
   templateUrl: './group.html'
 })
 export class GroupComponent implements OnInit {
-  apiUrl = 'http://localhost:3000/api/groups';
   grupos: any[] = [];
-  grupoDialog: boolean = false;
-  grupo: any = {};
-  submitted: boolean = false;
+  displayDialog: boolean = false;
+  grupoActual: any = {};
 
-  constructor(private messageService: MessageService, public auth: AuthService, private http: HttpClient) {}
+  constructor(
+    private http: HttpClient,
+    private messageService: MessageService,
+    public auth: AuthService,
+    private router: Router // <-- INYECTAMOS EL ROUTER
+  ) {}
 
   ngOnInit() {
     this.cargarGrupos();
@@ -43,62 +41,65 @@ export class GroupComponent implements OnInit {
   }
 
   cargarGrupos() {
-    this.http.get<any>(this.apiUrl, { headers: this.getHeaders() }).subscribe({
+    this.http.get<any>('http://localhost:3000/api/groups', { headers: this.getHeaders() }).subscribe({
       next: (res) => this.grupos = res.data,
       error: () => this.messageService.add({ severity: 'error', summary: 'Error', detail: 'No se pudieron cargar los grupos' })
     });
   }
 
-  abrirNuevo() {
-    this.grupo = {};
-    this.submitted = false;
-    this.grupoDialog = true;
+  abrirNuevoGrupo() {
+    this.grupoActual = { nombre: '', categoria: '', nivel: 'Medio' };
+    this.displayDialog = true;
   }
 
-  editarGrupo(g: any) {
-    this.grupo = { ...g };
-    this.grupoDialog = true;
+  editarGrupo(grupo: any) {
+    this.grupoActual = { ...grupo };
+    this.displayDialog = true;
   }
 
-  eliminarGrupo(g: any) {
-    this.http.delete(`${this.apiUrl}/${g.id}`, { headers: this.getHeaders() }).subscribe({
-      next: () => {
-        this.grupos = this.grupos.filter(val => val.id !== g.id);
-        this.messageService.add({ severity: 'success', summary: 'Eliminado', detail: 'Grupo borrado de la base de datos' });
-      },
-      error: () => this.messageService.add({ severity: 'error', summary: 'Bloqueado', detail: 'No tienes permiso para borrar grupos' })
-    });
-  }
+  // --- NUEVA FUNCIÓN PARA REDIRIGIR A LOS TICKETS ---
+  verTicketsDelGrupo(grupo: any) {
+    // Simulamos la selección del grupo como lo hace el Dashboard
+    localStorage.setItem('erp_current_group', grupo.id.toString());
+    localStorage.setItem('erp_current_group_name', grupo.nombre);
 
-  ocultarDialogo() {
-    this.grupoDialog = false;
-    this.submitted = false;
+    // Actualizamos los permisos en memoria para el nuevo contexto
+    this.auth.setPermisosGrupo(grupo.id.toString());
+
+    // Redirigimos al componente del Kanban (Ajusta la ruta '/vista-grupo' si en tu app.routes.ts se llama diferente)
+    this.router.navigate(['/vista-grupo']);
   }
 
   guardarGrupo() {
-    this.submitted = true;
-
-    if (this.grupo.nombre?.trim()) {
-      if (this.grupo.id) {
-        this.http.put<any>(`${this.apiUrl}/${this.grupo.id}`, this.grupo, { headers: this.getHeaders() }).subscribe({
-          next: (res) => {
-            const index = this.grupos.findIndex(g => g.id === this.grupo.id);
-            this.grupos[index] = res.data[0];
-            this.grupoDialog = false;
-            this.messageService.add({ severity: 'success', summary: 'Actualizado', detail: 'Grupo modificado en servidor' });
-          },
-          error: () => this.messageService.add({ severity: 'error', summary: 'Bloqueado', detail: 'Permisos insuficientes' })
+    if (this.grupoActual.nombre) {
+      if (this.grupoActual.id) {
+        this.http.put<any>(`http://localhost:3000/api/groups/${this.grupoActual.id}`, this.grupoActual, { headers: this.getHeaders() }).subscribe({
+          next: () => {
+            this.cargarGrupos();
+            this.displayDialog = false;
+            this.messageService.add({ severity: 'success', summary: 'Éxito', detail: 'Grupo actualizado' });
+          }
         });
       } else {
-        this.http.post<any>(this.apiUrl, this.grupo, { headers: this.getHeaders() }).subscribe({
-          next: (res) => {
-            this.grupos.push(res.data[0]);
-            this.grupoDialog = false;
-            this.messageService.add({ severity: 'success', summary: 'Creado', detail: 'Grupo sincronizado con servidor' });
-          },
-          error: (err) => this.messageService.add({ severity: 'error', summary: 'Error', detail: err.error?.data?.[0]?.message || 'Permisos insuficientes' })
+        this.http.post<any>('http://localhost:3000/api/groups', this.grupoActual, { headers: this.getHeaders() }).subscribe({
+          next: () => {
+            this.cargarGrupos();
+            this.displayDialog = false;
+            this.messageService.add({ severity: 'success', summary: 'Éxito', detail: 'Grupo creado' });
+          }
         });
       }
+    }
+  }
+
+  eliminarGrupo(id: number) {
+    if(confirm('¿Seguro que deseas eliminar este workspace? Esto borrará todos sus tickets asociados.')) {
+      this.http.delete<any>(`http://localhost:3000/api/groups/${id}`, { headers: this.getHeaders() }).subscribe({
+        next: () => {
+          this.cargarGrupos();
+          this.messageService.add({ severity: 'success', summary: 'Éxito', detail: 'Grupo eliminado' });
+        }
+      });
     }
   }
 }

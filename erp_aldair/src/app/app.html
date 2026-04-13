@@ -1,44 +1,49 @@
-<ng-container *ngIf="showMenu">
-  <div style="padding: 1rem; background: #1e293b; color: white; display: flex; align-items: center; justify-content: space-between;">
-
-    <div style="display: flex; align-items: center; gap: 1rem;">
-      <p-button (click)="sidebarVisible = true" icon="pi pi-bars" [rounded]="true" severity="secondary"></p-button>
-      <span style="font-weight: bold; font-size: 1.2rem;">ERP Aldair</span>
-    </div>
-
-    <div style="display: flex; align-items: center; gap: 1.5rem;">
-      <div style="color: #4ade80; font-weight: bold; border: 1px solid #4ade80; padding: 0.3rem 0.8rem; border-radius: 20px;">
-        {{ rutaActual }}
+<ng-container *ngIf="mostrarMenu">
+  <p-sidebar [(visible)]="sidebarVisible" position="left" styleClass="w-18rem">
+    <div class="flex flex-column h-full">
+      <div class="flex align-items-center justify-content-center py-4 border-bottom-1 surface-border">
+        <i class="pi pi-box text-primary text-4xl mr-2"></i>
+        <span class="text-2xl font-bold text-primary">ERPJir</span>
       </div>
-      <ng-container *appHasPermission="'user:view'">
-        <p-button icon="pi pi-user" [rounded]="true" severity="info" routerLink="/user" title="Mi Perfil"></p-button>
-      </ng-container>
-    </div>
 
-  </div>
-
-  <p-sidebar [(visible)]="sidebarVisible">
-      <div style="padding: 1rem;">
-          <h2>ERP Proyecto</h2>
-          <hr>
-          <div style="display: flex; flex-direction: column; gap: 0.5rem;">
-
-              <p-button label="Dashboard" icon="pi pi-home" [text]="true" routerLink="/dashboard" (click)="sidebarVisible = false"></p-button>
-
-              <ng-container *appHasPermission="'group:view'">
-                <p-button label="Grupos" icon="pi pi-users" [text]="true" routerLink="/group" (click)="sidebarVisible = false"></p-button>
-              </ng-container>
-
-              <ng-container *appHasPermission="'users:manage'">
-                <p-button label="Super Admin" icon="pi pi-lock" [text]="true" severity="danger" routerLink="/gestion-usuarios" (click)="sidebarVisible = false"></p-button>
-              </ng-container>
-
-          </div>
-          <div style="position: absolute; bottom: 20px; left: 20px;">
-              <span style="color: #94a3b8; font-size: 0.85rem;">Version {{ appVersion }}</span>
-          </div>
+      <div class="flex-1 overflow-y-auto py-4">
+        <ul class="list-none p-0 m-0">
+          <li class="mb-2">
+            <a routerLink="/dashboard" (click)="sidebarVisible = false" class="p-ripple flex align-items-center cursor-pointer p-3 border-round text-700 hover:surface-100 transition-duration-150 transition-colors w-full" style="text-decoration: none;">
+              <i class="pi pi-home mr-3 text-lg"></i><span class="font-medium text-lg">Dashboard</span>
+            </a>
+          </li>
+          <li class="mb-2" *appHasPermission="'users:manage'">
+            <a routerLink="/gestion-usuarios" (click)="sidebarVisible = false" class="p-ripple flex align-items-center cursor-pointer p-3 border-round text-700 hover:surface-100 transition-duration-150 transition-colors w-full" style="text-decoration: none;">
+              <i class="pi pi-users mr-3 text-lg"></i><span class="font-medium text-lg">Admin Usuarios</span>
+            </a>
+          </li>
+          <li class="mb-2" *appHasPermission="'groups:manage'">
+            <a routerLink="/group" (click)="sidebarVisible = false" class="p-ripple flex align-items-center cursor-pointer p-3 border-round text-700 hover:surface-100 transition-duration-150 transition-colors w-full" style="text-decoration: none;">
+              <i class="pi pi-briefcase mr-3 text-lg"></i><span class="font-medium text-lg">Admin Grupos</span>
+            </a>
+          </li>
+        </ul>
       </div>
+
+      <div class="mt-auto border-top-1 surface-border pt-4">
+        <p-button label="Cerrar Sesión" icon="pi pi-sign-out" severity="danger" [text]="true" [raised]="true" styleClass="w-full font-bold" (onClick)="auth.logout(); sidebarVisible = false"></p-button>
+      </div>
+    </div>
   </p-sidebar>
+
+  <div class="surface-card shadow-1 flex align-items-center justify-content-between px-4 py-3 sticky top-0 z-5">
+    <div class="flex align-items-center">
+      <p-button icon="pi pi-bars" (onClick)="sidebarVisible = true" styleClass="p-button-rounded p-button-text p-button-plain mr-3" size="large"></p-button>
+      <span class="text-xl font-bold text-900">Workspace Activo</span>
+    </div>
+    <div class="flex align-items-center gap-3">
+      <span class="font-medium text-600 hidden md:block">{{ auth.usuarioActual?.nombre }}</span>
+      <p-button icon="pi pi-user" styleClass="p-button-rounded p-button-outlined"></p-button>
+    </div>
+  </div>
 </ng-container>
 
-<router-outlet></router-outlet>
+<div class="p-4" [ngClass]="{'min-h-screen': true}">
+  <router-outlet></router-outlet>
+</div>

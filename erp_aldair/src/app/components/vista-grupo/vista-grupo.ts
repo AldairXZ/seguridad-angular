@@ -15,6 +15,7 @@ import { ToastModule } from 'primeng/toast';
 import { MessageService } from 'primeng/api';
 import { AuthService } from '../../services/auth';
 import { HasPermissionDirective } from '../../directives/has-permission.directive';
+import { TooltipModule } from 'primeng/tooltip';
 
 @Component({
   selector: 'app-vista-grupo',
@@ -23,7 +24,7 @@ import { HasPermissionDirective } from '../../directives/has-permission.directiv
     CommonModule, FormsModule, SelectButtonModule, TableModule,
     CardModule, TagModule, ButtonModule, DialogModule,
     InputTextModule, DropdownModule, DragDropModule,
-    ToastModule, HasPermissionDirective
+    ToastModule, HasPermissionDirective, TooltipModule
   ],
   providers: [MessageService],
   templateUrl: './vista-grupo.html'
@@ -65,7 +66,12 @@ export class VistaGrupoComponent implements OnInit {
 
   private getHeaders() {
     const token = document.cookie.split('; ').find(row => row.startsWith('erp_token='))?.split('=')[1];
-    return new HttpHeaders().set('Authorization', `Bearer ${token}`);
+    let headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
+    if (this.groupId !== null && this.groupId !== undefined) {
+      headers = headers.set('x-group-id', this.groupId.toString());
+    }
+
+    return headers;
   }
 
   cargarTickets() {

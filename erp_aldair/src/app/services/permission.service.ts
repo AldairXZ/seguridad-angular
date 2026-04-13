@@ -12,5 +12,6 @@ export class PermissionService {
   }
 
   refreshPermissionsForGroup(groupId: string): void {
+    this.auth.setPermisosGrupo(groupId);
   }
 }

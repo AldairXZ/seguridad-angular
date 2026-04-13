@@ -1,14 +1,26 @@
+/* Importaciones de PrimeNG y PrimeFlex */
 @import "primeng/resources/themes/lara-light-blue/theme.css";
 @import "primeicons/primeicons.css";
 @import "primeng/resources/primeng.min.css";
+@import "primeflex/primeflex.css";
 
+/* Estilos Globales */
 body {
-    background-color: #f8f9fa;
+    background-color: #f8f9fa; /* o var(--surface-ground) */
     font-family: var(--font-family);
     margin: 0;
     padding: 0;
 }
 
+/* Scrollbar moderno para el Kanban y menús */
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #c1c1c1; border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: #a8a8a8; }
+
+/* ---------------------------------------------------
+   Tus Clases Personalizadas (Login / Register / Landing)
+   --------------------------------------------------- */
 .auth-container {
     display: flex;
     justify-content: center;
